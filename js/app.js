@@ -364,7 +364,13 @@ function generateMapaMina(){
 }
 
 function renderAll(){renderSummary();renderMap();renderStudents();renderClass();renderDescriptors();renderTomorrow();renderHistory();renderMapaMina();}
-function go(id){$$('.view').forEach(v=>v.classList.toggle('active',v.id==id));$$('.nav').forEach(b=>b.classList.toggle('active',b.dataset.view==id));renderAll();}
+function go(id){
+  $$('.view').forEach(v=>{const on=v.id===id; v.classList.toggle('active',on); v.hidden=!on; v.style.display=on?'block':'none';});
+  $$('.nav').forEach(b=>b.classList.toggle('active',b.dataset.view===id));
+  const side=$('#sidebar'); if(side) side.classList.remove('open');
+  window.scrollTo({top:0,behavior:'smooth'});
+  renderAll();
+}
 document.addEventListener('click',e=>{let goid=e.target.dataset.go||e.target.dataset.view;if(goid)go(goid); if(e.target.dataset.report)$('#reportOutput').value=makeReport(e.target.dataset.report)});
 $('#processData').onclick=()=>parseData($('#pasteData').value);$('#loadExample').onclick=()=>{$('#pasteData').value='Nome,Q1,Q2,Q3,Q4,Q5,Q6,Q7,Q8\nDescritores,D16,D4,D4,D16,D19,D15,D5,D10\nGabarito,C,C,C,C,C,D,A,B\nAna Silva,C,D,B,B,A,B,A,B\nBruno Souza,E,B,E,B,D,D,B,B\nCarla Lima,C,C,C,D,C,D,A,A\nDiego Costa,B,C,A,C,E,D,C,B';parseData($('#pasteData').value)};
 $('#fileInput').onchange=async e=>{let f=e.target.files[0]; if(!f)return; $('#extractStatus').textContent='Arquivo selecionado: '+f.name+'. Clique em Ler arquivo.'; if(/csv|text/.test(f.type)||f.name.match(/\.csv|\.txt$/i)){let t=await f.text();$('#pasteData').value=t;} if(f.name.match(/\.xlsx?$|\.xls$/i)){try{let book=await readExcelFile(f);$('#pasteData').value=aoaToText(book.rows);$('#extractStatus').textContent='Planilha lida: aba '+book.name+'. Confira os dados e clique em Processar, ou clique em Ler arquivo para processar automaticamente.';}catch(err){$('#extractStatus').textContent='Não consegui ler a planilha: '+err.message;}}};
@@ -381,5 +387,9 @@ if($('#mapStudent')) $('#mapStudent').onchange=generateMapaMina;
 if($('#copyMap')) $('#copyMap').onclick=()=>navigator.clipboard.writeText($('#mapaOutput')?.dataset?.plain||$('#mapaOutput')?.innerText||'');
 if($('#downloadMap')) $('#downloadMap').onclick=()=>download('mapa-da-mina.txt',$('#mapaOutput')?.dataset?.plain||$('#mapaOutput')?.innerText||'');
 function download(name,text){let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:'text/plain;charset=utf-8'}));a.download=name;a.click();URL.revokeObjectURL(a.href)}
+
+if($('#openMenu')) $('#openMenu').onclick=()=>$('#sidebar')?.classList.add('open');
+if($('#closeMenu')) $('#closeMenu').onclick=()=>$('#sidebar')?.classList.remove('open');
+document.addEventListener('keydown',e=>{if(e.key==='Escape') $('#sidebar')?.classList.remove('open')});
 if('serviceWorker' in navigator)navigator.serviceWorker.register('service-worker.js').catch(()=>{});
-load();loadDescriptors().then(()=>{syncDisciplineControls();renderAll();});
+load();loadDescriptors().then(()=>{syncDisciplineControls();renderAll();go(document.querySelector('.view.active')?.id||'inicio');});
