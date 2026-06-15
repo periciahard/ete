@@ -1,64 +1,19 @@
-# ETE Professor José Luiz de Mendonça — Diagnóstico Pedagógico Inteligente
+# Diagnóstico Pedagógico ETE - Versão 21.0
 
-Sistema criado por **Felipe Camargo** para análise de resultados por questão, descritores SAEB/SAEPE, relatórios pedagógicos e Mapa da Mina individualizado.
+Sistema local para análise de avaliações por descritores SAEB/SAEPE.
 
-## Versão
-20.0
-
-## Modelo de Excel recomendado
-
-A planilha deve seguir este modelo:
-
-| Aluno | Q1 | Q2 | Q3 |
-|---|---|---|---|
-| Descritores | D16 | D4 | D4 |
-| Gabarito | C | C | C |
-| Ana Silva | C | D | B |
-| Bruno Souza | E | B | E |
-
-O sistema identifica automaticamente:
-
-1. primeira linha: questões;
-2. segunda linha: descritores;
-3. terceira linha: gabarito;
-4. demais linhas: respostas dos alunos.
-
-## IA no Mapa da Mina
-
-No GitHub Pages o site é estático. Portanto, a IA só funciona se uma das opções abaixo for configurada:
-
-### Opção recomendada: backend/proxy na Vercel
-
-1. Publique este projeto também na Vercel.
-2. No painel da Vercel, configure a variável de ambiente:
-
-```text
-OPENAI_API_KEY=sua_chave
-```
-
-3. No site, em **Configurações > Configurar IA**, informe a URL:
-
-```text
-https://seu-projeto.vercel.app/api/openai
-```
-
-### Opção de teste: chave direta no navegador
-
-É possível informar a chave diretamente no navegador, mas isso não é recomendado para uso institucional, pois a chave pode ficar exposta no dispositivo do usuário.
-
-## Arquivos principais
-
-- `index.html`: página principal.
-- `css/style.css`: visual do sistema.
-- `js/app.js`: lógica do diagnóstico.
-- `api/openai.js`: backend/proxy para Vercel.
-- `assets/logo-ete.png`: logo institucional.
-- `descritores/`: banco de descritores.
+## Novidades da V21
+- Remoção completa da IA.
+- Botão Mapa da Mina local.
+- Ficha de Exercícios individualizada com 10 questões-modelo por aluno.
+- TRI pedagógica da prova para estimar dificuldade, discriminação e possíveis indícios de chute.
+- Leitura de Excel no modelo:
+  1. Linha 1: questões
+  2. Linha 2: descritores
+  3. Linha 3: gabarito
+  4. Demais linhas: respostas dos alunos
 
 ## Publicação no GitHub Pages
+Faça upload de todos os arquivos deste pacote no repositório e ative o GitHub Pages na branch principal.
 
-Envie todos os arquivos para o repositório e ative:
-
-```text
-Settings > Pages > Deploy from branch > main > root
-```
+Criado por Felipe Camargo.
