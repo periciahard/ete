@@ -1,4 +1,4 @@
-# ETE Professor José Luiz de Mendonça — Diagnóstico Pedagógico V39
+# ETE Professor José Luiz de Mendonça — Diagnóstico Pedagógico V40
 
 Sistema Inteligente de Diagnóstico Educacional criado por Felipe Camargo.
 
@@ -6,7 +6,7 @@ Sistema Inteligente de Diagnóstico Educacional criado por Felipe Camargo.
 
 Importar resultados de avaliações, analisar desempenho por aluno e por descritor, gerar relatórios pedagógicos, Mapa da Mina, fichas de exercícios e leitura gestora para coordenação.
 
-## Novidades V39
+## Novidades V40
 
 - Validação obrigatória antes da análise: relatórios só devem ser gerados com estrutura válida.
 - Assistente guiado: Importar → Validar → Diagnosticar → Intervir → Salvar.
@@ -43,3 +43,9 @@ Antes de usar o modo institucional, execute o script `supabase_ete_diagnostico_s
 4. Gerar relatórios.
 5. Gerar recuperação/ficha.
 6. Salvar backup local ou sincronizar na nuvem.
+
+
+## Correções V40
+- Botão **Confirmar e analisar** movido para a área de Conferência obrigatória, sempre visível após importar Excel/PDF ou usar digitação manual.
+- Removida a opção de leitura por foto/OCR do gabarito para reduzir instabilidade e simplificar o fluxo principal.
+- Fluxo recomendado: Excel → Conferência obrigatória → Confirmar e analisar → Relatórios.
