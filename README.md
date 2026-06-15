@@ -56,3 +56,28 @@ Recomenda-se conferir e ajustar conforme a matriz vigente adotada pela rede, pel
 ## Melhorias de leitura de PDF/imagem
 
 Esta versão inclui leitura automática de PDF com PDF.js e OCR de imagens/PDF escaneado com Tesseract.js no navegador. Após extrair, o professor deve conferir a tabela antes de processar. Para máxima confiabilidade, recomenda-se usar CSV ou colar a tabela no formato `Aluno,Q1,Q2,Q3...`.
+
+
+## Versão 12 — Leitura de Excel
+
+Esta versão adiciona leitura direta de arquivos `.xlsx` e `.xls` usando SheetJS no navegador.
+
+Modelos aceitos:
+
+1. **Tabela simples de acertos**
+
+```csv
+Aluno,Q1,Q2,Q3
+Maria,1,0,1
+João,0,1,1
+```
+
+2. **Tabela com gabarito por descritor**
+
+Primeira coluna: `Aluno`; colunas seguintes: `Q1`, `Q2`, `Q3`...
+Linha `gabarito`: descritores corretos de cada questão, como `D15`, `D14`, `D10`...
+Linhas dos alunos: resposta/descrititor marcado em cada questão.
+
+O sistema compara automaticamente a resposta do aluno com o gabarito e transforma em acerto/erro.
+
+Observação: para leitura de `.xlsx` no GitHub Pages, a biblioteca SheetJS é carregada por CDN. Se a internet estiver bloqueada na primeira abertura, salve a planilha como `.csv` e importe normalmente.

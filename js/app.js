@@ -65,6 +65,67 @@ function splitSmart(line){
   return [line.trim()];
 }
 function looksLikeHeader(cols){return cols.slice(1).some(c=>/^q\d+$/i.test(c)||/^quest/i.test(c))||/aluno|nome|estudante/i.test(cols[0]||'')}
+
+function aoaToText(rows){
+  return rows.map(r=>r.map(c=>normalizeCell(c)).join('\t')).join('\n');
+}
+function parseExcelRows(rows){
+  rows=(rows||[]).map(r=>(r||[]).map(c=>normalizeCell(c))).filter(r=>r.some(c=>c));
+  if(!rows.length) throw new Error('A planilha está vazia.');
+  // Remove linhas completamente vazias nas extremidades e limita colunas úteis.
+  const headerIndex=rows.findIndex(r=>r.some(c=>/^aluno$/i.test(c)) && r.some(c=>/^Q\s*\d+/i.test(c)));
+  const gabaritoIndex=rows.findIndex(r=>r.some(c=>/^gabarito$/i.test(c)));
+  // Modelo 1: primeira coluna Aluno, linha gabarito com descritores e alunos respondendo D1/D2...
+  if(headerIndex>=0 && gabaritoIndex>=0){
+    const header=rows[headerIndex];
+    const alunoCol=header.findIndex(c=>/^aluno$/i.test(c));
+    const qCols=[];
+    header.forEach((c,i)=>{ if(/^Q\s*\d+/i.test(c)) qCols.push(i); });
+    if(qCols.length){
+      const keyRow=rows[gabaritoIndex];
+      const key=qCols.map(i=>normalizeCell(keyRow[i]).toUpperCase()).map(v=>/^D\d{1,2}$/.test(v)?v:'');
+      const qs=qCols.map((i,k)=>`Q${k+1}`);
+      const students=[];
+      rows.slice(gabaritoIndex+1).forEach(r=>{
+        let name=normalizeCell(r[alunoCol]);
+        if(!name || /^total|m[eé]dia|quest/i.test(name.toLowerCase())) return;
+        let raw=qCols.map(i=>normalizeCell(r[i]).toUpperCase());
+        let answers=raw.map((v,i)=> /^D\d{1,2}$/.test(v) && key[i] ? (v===key[i]?1:0) : answerValue(v));
+        students.push({name,answers,raw});
+      });
+      if(students.length){ state.questions=qs; state.students=students.slice(0,50); qs.forEach((q,i)=>state.map[q]=key[i]||state.map[q]||''); save(); renderAll(); go('turma'); return true; }
+    }
+  }
+  // Modelo 2: primeira linha com Aluno,Q1,Q2... e valores 1/0/C/E.
+  const hi=headerIndex>=0?headerIndex:0;
+  const header=rows[hi];
+  const alunoCol=header.findIndex(c=>/^aluno|nome/i.test(c));
+  if(alunoCol>=0){
+    const qCols=[]; header.forEach((c,i)=>{ if(i!==alunoCol && (/^Q\s*\d+/i.test(c)||i>alunoCol)) qCols.push(i); });
+    const qs=qCols.map((i,k)=>/^Q\s*\d+/i.test(header[i])?header[i].replace(/\s+/g,''):`Q${k+1}`);
+    const students=[];
+    rows.slice(hi+1).forEach(r=>{
+      let name=normalizeCell(r[alunoCol]);
+      if(!name || /^gabarito|total|m[eé]dia|quest/i.test(name.toLowerCase())) return;
+      students.push({name,answers:qCols.map(i=>answerValue(r[i]))});
+    });
+    if(students.length){ state.questions=qs; state.students=students.slice(0,50); qs.forEach(q=>state.map[q]=state.map[q]||''); save(); renderAll(); go('turma'); return true; }
+  }
+  return false;
+}
+async function readExcelFile(file){
+  if(!window.XLSX) throw new Error('Biblioteca Excel não carregou. Verifique a internet na primeira abertura ou salve a planilha como CSV.');
+  const buf=await file.arrayBuffer();
+  const wb=XLSX.read(buf,{type:'array'});
+  let best=null;
+  for(const name of wb.SheetNames){
+    const rows=XLSX.utils.sheet_to_json(wb.Sheets[name],{header:1,defval:'',raw:false});
+    if(!best || rows.length>best.rows.length) best={name,rows};
+  }
+  if(!best) throw new Error('Não encontrei abas na planilha.');
+  return best;
+}
+
 function parseData(text){
   text=(text||'').replace(/\u00a0/g,' ').trim();
   const desc=parseDescriptorAnswerSheet(text);
@@ -111,6 +172,13 @@ async function extractSelectedFile(){
   if(!file){alert('Escolha um PDF, imagem, CSV ou TXT primeiro.');return;}
   try{
     status.textContent='Lendo arquivo...'; let text='';
+    if(file.name.match(/\.xlsx?$|\.xls$/i)){
+      const book=await readExcelFile(file);
+      $('#pasteData').value=aoaToText(book.rows);
+      const ok=parseExcelRows(book.rows);
+      status.textContent=ok?`Excel processado automaticamente pela aba ${book.name}.`:`Excel lido pela aba ${book.name}. Confira a tabela extraída e clique em Processar dados.`;
+      return;
+    }
     if(file.type==='application/pdf'||/\.pdf$/i.test(file.name)) text=await extractPdfText(file);
     else if(file.type.startsWith('image/')) text=await extractImageText(file);
     else text=await file.text();
@@ -141,7 +209,7 @@ function renderAll(){renderSummary();renderMap();renderStudents();renderClass();
 function go(id){$$('.view').forEach(v=>v.classList.toggle('active',v.id==id));$$('.nav').forEach(b=>b.classList.toggle('active',b.dataset.view==id));renderAll();}
 document.addEventListener('click',e=>{let goid=e.target.dataset.go||e.target.dataset.view;if(goid)go(goid); if(e.target.dataset.report)$('#reportOutput').value=makeReport(e.target.dataset.report)});
 $('#processData').onclick=()=>parseData($('#pasteData').value);$('#loadExample').onclick=()=>{$('#pasteData').value='Aluno,Q1,Q2,Q3,Q4,Q5,Q6,Q7,Q8\nAna,1,1,0,1,0,1,1,0\nBruno,0,1,0,0,0,1,0,0\nCarla,1,1,1,1,1,0,1,1\nDiego,0,0,1,0,1,0,0,1';parseData($('#pasteData').value)};
-$('#fileInput').onchange=async e=>{let f=e.target.files[0]; if(!f)return; $('#extractStatus').textContent='Arquivo selecionado: '+f.name+'. Clique em Ler PDF/imagem ou Processar se for CSV/TXT.'; if(/csv|text/.test(f.type)||f.name.match(/\.csv|\.txt$/i)){let t=await f.text();$('#pasteData').value=t;}};
+$('#fileInput').onchange=async e=>{let f=e.target.files[0]; if(!f)return; $('#extractStatus').textContent='Arquivo selecionado: '+f.name+'. Clique em Ler arquivo.'; if(/csv|text/.test(f.type)||f.name.match(/\.csv|\.txt$/i)){let t=await f.text();$('#pasteData').value=t;} if(f.name.match(/\.xlsx?$|\.xls$/i)){try{let book=await readExcelFile(f);$('#pasteData').value=aoaToText(book.rows);$('#extractStatus').textContent='Planilha lida: aba '+book.name+'. Confira os dados e clique em Processar, ou clique em Ler arquivo para processar automaticamente.';}catch(err){$('#extractStatus').textContent='Não consegui ler a planilha: '+err.message;}}};
 $('#extractFile').onclick=extractSelectedFile;
 $('#studentSearch').oninput=renderStudents; $('#descriptorSearch').oninput=renderDescriptors; $('#descriptorDiscipline').onchange=renderDescriptors;
 $('#saveSnapshot').onclick=()=>{let avg=pct(state.students.reduce((a,s)=>a+calcStudent(s).ac,0),state.students.length*state.questions.length);state.history.push({date:new Date().toLocaleString('pt-BR'),avg,students:state.students.length});save();renderHistory()};

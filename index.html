@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="css/style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
   <aside class="sidebar" id="sidebar">
@@ -43,10 +44,10 @@
     </section>
 
     <section id="importar" class="view">
-      <h2>📤 Importar avaliação</h2><p class="hint">Cole uma tabela, envie CSV/TXT ou tente extrair de PDF/imagem. Modelo ideal: primeira linha com <b>Aluno,Q1,Q2,Q3...</b> e linhas com 1 para acerto e 0 para erro. Até 50 alunos.</p>
+      <h2>📤 Importar avaliação</h2><p class="hint">Cole uma tabela, envie Excel/CSV/TXT ou tente extrair de PDF/imagem. Modelo ideal: primeira linha com <b>Aluno,Q1,Q2,Q3...</b> ou uma planilha com a primeira coluna “Aluno” e linhas com 1 para acerto e 0 para erro. Até 50 alunos.</p>
       <textarea id="pasteData" placeholder="Aluno,Q1,Q2,Q3,Q4\nMaria,1,0,1,1\nJoão,0,1,1,0"></textarea>
-      <div class="actions"><input type="file" id="fileInput" accept=".csv,.txt,.pdf,image/*"><button id="extractFile" class="secondary">Ler PDF/imagem</button><button id="loadExample">Usar exemplo</button><button id="processData">Processar dados</button></div><div id="extractStatus" class="statusbox">Nenhum arquivo lido ainda.</div>
-      <details open><summary>❓ Como usar PDF ou imagem?</summary><p>O sistema tenta ler PDF com texto pesquisável usando PDF.js. Se o PDF for escaneado/foto, usa OCR no navegador. Depois da leitura, confira a tabela extraída antes de processar.</p><p><b>Dica:</b> quando o PDF vier desalinhado, copie o resultado extraído, ajuste a primeira linha para <code>Aluno,Q1,Q2,Q3...</code> e use 1 para acerto e 0 para erro. Também aceita <code>C/E</code>, <code>A/E</code>, <code>✓/x</code> e <code>Sim/Não</code>.</p></details>
+      <div class="actions"><input type="file" id="fileInput" accept=".xlsx,.xls,.csv,.txt,.pdf,image/*"><button id="extractFile" class="secondary">Ler arquivo</button><button id="loadExample">Usar exemplo</button><button id="processData">Processar dados</button></div><div id="extractStatus" class="statusbox">Nenhum arquivo lido ainda.</div>
+      <details open><summary>❓ Como usar Excel, PDF ou imagem?</summary><p>Para Excel, use uma planilha com a primeira coluna contendo os nomes dos alunos e as demais colunas como Q1, Q2, Q3 etc. O sistema aceita células com 1/0, certo/errado, C/E, sim/não ou descritores D1, D2 etc. Para PDF, tenta ler texto pesquisável usando PDF.js. Se o PDF for escaneado/foto, usa OCR no navegador. Depois da leitura, confira a tabela extraída antes de processar.</p><p><b>Dica:</b> quando o PDF vier desalinhado, copie o resultado extraído, ajuste a primeira linha para <code>Aluno,Q1,Q2,Q3...</code> e use 1 para acerto e 0 para erro. Também aceita <code>C/E</code>, <code>A/E</code>, <code>✓/x</code> e <code>Sim/Não</code>.</p></details>
       <div class="panel"><h3>Mapeamento das questões</h3><p class="hint">Depois de processar, informe o descritor de cada questão.</p><div id="questionMap" class="question-grid"></div></div>
     </section>
 
