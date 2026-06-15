@@ -7,6 +7,52 @@ async function loadDescriptors(){try{let [p,m]=await Promise.all([fetch('descrit
 function pct(n,d){return d?Math.round(n/d*100):0} function level(v){return v>=70?['Consolidado','ok','🟢']:v>=40?['Em desenvolvimento','warn','🟡']:['Crítico','bad','🔴']}
 function normalizeCell(x){return String(x||'').trim().replace(/^"|"$/g,'')}
 function answerValue(x){x=normalizeCell(x).toLowerCase(); if(!x)return 0; if(/^(1|s|sim|c|certo|correto|acerto|a|✓|✔|ok)$/i.test(x))return 1; if(/^(0|n|não|nao|e|errado|erro|x|✗|✘)$/i.test(x))return 0; return /1|sim|certo|acerto|✓|✔/.test(x)?1:0}
+
+function normalizePdfTokens(text){
+  return (text||'')
+    .replace(/\u00a0/g,' ')
+    .replace(/([A-Za-zÀ-ÿ])\s*\n\s*([a-zà-ÿ])/g,'$1 $2')
+    .replace(/D\s*(\d)\s+([0-9])\b/g,'D$1$2')
+    .replace(/D\s*(\d{1,2})\b/gi,'D$1')
+    .replace(/Q\s*(\d)\s+([0-9])\b/g,'Q$1$2')
+    .replace(/Q\s*(\d{1,2})\b/gi,'Q$1')
+    .replace(/\s+/g,' ')
+    .trim();
+}
+function parseDescriptorAnswerSheet(text){
+  const cleaned=normalizePdfTokens(text);
+  const tokens=cleaned.match(/gabarito|D\d{1,2}|[A-Za-zÀ-ÿ]+(?:['’][A-Za-zÀ-ÿ]+)?|\d+/gi)||[];
+  const gi=tokens.findIndex(t=>/^gabarito$/i.test(t));
+  if(gi<0) return null;
+  const after=tokens.slice(gi+1);
+  const key=[]; let pos=0;
+  while(pos<after.length && key.length<26){
+    if(/^D\d{1,2}$/i.test(after[pos])) key.push(after[pos].toUpperCase());
+    pos++;
+  }
+  if(key.length<5) return null;
+  const qs=key.map((_,i)=>`Q${i+1}`);
+  const students=[]; let name=[]; let answers=[];
+  for(;pos<after.length;pos++){
+    const tok=after[pos];
+    if(/^D\d{1,2}$/i.test(tok)){
+      answers.push(tok.toUpperCase());
+      if(answers.length===key.length){
+        const studentName=name.join(' ').trim();
+        if(studentName && !/^gabarito$/i.test(studentName)){
+          students.push({name:studentName,answers:answers.map((a,i)=>a===key[i]?1:0),raw:answers.slice()});
+        }
+        name=[]; answers=[];
+      }
+    }else if(/^[A-Za-zÀ-ÿ]/.test(tok)){
+      if(answers.length===0) name.push(tok);
+    }
+    if(students.length>=50) break;
+  }
+  if(!students.length) return null;
+  return {qs,students,key};
+}
+
 function splitSmart(line){
   if(line.includes(';'))return line.split(';').map(normalizeCell);
   if(line.includes('\t'))return line.split('\t').map(normalizeCell);
@@ -21,6 +67,15 @@ function splitSmart(line){
 function looksLikeHeader(cols){return cols.slice(1).some(c=>/^q\d+$/i.test(c)||/^quest/i.test(c))||/aluno|nome|estudante/i.test(cols[0]||'')}
 function parseData(text){
   text=(text||'').replace(/\u00a0/g,' ').trim();
+  const desc=parseDescriptorAnswerSheet(text);
+  if(desc){
+    state.questions=desc.qs;
+    state.students=desc.students;
+    desc.qs.forEach((q,i)=>state.map[q]=desc.key[i]);
+    save(); renderAll(); go('turma');
+    const st=$('#extractStatus'); if(st)st.textContent=`Arquivo processado como tabela de gabarito por descritor: ${desc.students.length} alunos e ${desc.qs.length} questões.`;
+    return;
+  }
   let lines=text.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
   if(!lines.length){alert('Cole ou extraia uma tabela antes de processar.');return;}
   let rows=lines.map(splitSmart).filter(r=>r.length>1);
