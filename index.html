@@ -3,45 +3,40 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#123b66">
-  <title>ETE Professor José Luiz de Mendonça | Diagnóstico Pedagógico</title>
+  <meta name="theme-color" content="#0f2e5f">
+  <title>ETE Professor José Luiz de Mendonça | Diagnóstico Pedagógico V39</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css?v=39">
+  <style>body.app-ready .view{display:none}body.app-ready .view.active{display:block}</style>
 </head>
-<body>
-  <button class="mobile-menu" id="openMenu">☰</button>
+<body class="app-ready">
+  <div class="topbar"><button id="openMenu" class="menuBtn" aria-label="Abrir menu">☰ Menu</button><strong>ETE Professor José Luiz de Mendonça</strong><span id="cloudStatusMini" class="cloud-mini">Modo local</span></div>
   <aside class="sidebar" id="sidebar">
-    <div class="brand">
-      <img src="assets/logo-ete.png" alt="Logo ETE" class="brand-logo" onerror="this.style.display='none'">
-      <div><strong>ETE Prof. José Luiz</strong><small>Diagnóstico Inteligente</small></div>
-    </div>
-    <button class="ghost close-menu" id="closeMenu">Fechar ✕</button>
+    <div class="brand"><img class="brand-logo" src="assets/logo-ete.png" alt="Logo ETE"><div><strong>ETE Prof. José Luiz</strong><small>Diagnóstico Educacional</small></div></div>
+    <button id="closeMenu" class="closeMenu" aria-label="Fechar menu">×</button>
     <nav>
-      <button class="nav active" data-view="inicio">🏠 Início</button>
-      <button class="nav" data-view="importar">📤 Importar Dados</button>
-      <button class="nav" data-view="alunos">👨‍🎓 Alunos</button>
-      <button class="nav" data-view="turma">📊 Turma</button>
-      <button class="nav" data-view="descritores">🧩 Descritores</button>
-      <button class="nav" data-view="evolucao">📈 Evolução</button>
-      <button class="nav" data-view="relatorios">📄 Relatórios</button>
-      <button class="nav" data-view="amanha">🎯 O que fazer amanhã?</button>
-      <button class="nav highlight" data-view="mapa">🗺️ Mapa da Mina</button>
-      <button class="nav" data-view="foto">📷 Gabarito por foto</button>
-      <button class="nav" data-view="ficha">📝 Ficha de exercícios</button>
-      <button class="nav" data-view="tri">📐 TRI pedagógica</button>
-      <button class="nav" data-view="config">⚙️ Configurações</button>
+      <button class="nav active" data-view="inicio"><span>🏠</span> Início</button>
+      <button class="nav" data-view="assistente"><span>🧭</span> Assistente</button>
+      <button class="nav" data-view="importar"><span>📥</span> Importação</button>
+      <button class="nav" data-view="diagnostico"><span>📊</span> Diagnóstico</button>
+      <button class="nav" data-view="alunos"><span>👨‍🎓</span> Alunos</button>
+      <button class="nav" data-view="descritores"><span>🧩</span> Descritores</button>
+      <button class="nav" data-view="recuperacao"><span>📚</span> Recuperação</button>
+      <button class="nav" data-view="tri"><span>📈</span> TRI</button>
+      <button class="nav" data-view="coordenacao"><span>🏫</span> Coordenação</button>
+      <button class="nav" data-view="config"><span>⚙️</span> Configurações</button>
     </nav>
   </aside>
 
   <main class="main">
     <header class="hero">
-      <div class="hero-left">
-        <img src="assets/logo-ete.png" alt="Logo ETE" class="hero-logo" onerror="this.style.display='none'">
+      <div class="hero-title">
+        <img class="hero-logo" src="assets/logo-ete.png" alt="Logo ETE Professor José Luiz de Mendonça">
         <div>
           <p class="eyebrow">Sistema Inteligente de Diagnóstico Educacional</p>
           <h1>ETE Professor José Luiz de Mendonça</h1>
           <p>SAEB • SAEPE • BNCC • Projeto ENEM</p>
-          <p class="credit">Criado por Felipe Camargo</p>
+          <p class="creator">Criado por Felipe Camargo</p>
         </div>
       </div>
       <div class="savebox"><span id="saveStatus">Salvamento automático ativo</span><small id="lastSave">Ainda não salvo</small></div>
@@ -49,134 +44,132 @@
 
     <section id="inicio" class="view active">
       <div class="cards" id="summaryCards"></div>
-      <div class="panel"><h2>Transforme resultados em ações pedagógicas</h2><p>Importe o Excel da avaliação, selecione a disciplina e gere diagnósticos individuais, relatórios, agrupamentos e planos de intervenção.</p><div class="actions"><button data-go="importar">Começar importando dados</button><button data-go="mapa" class="secondary">Abrir Mapa da Mina</button></div></div>
+      <div class="panel heroPanel">
+        <h2>Transforme resultados em ações pedagógicas</h2>
+        <p>O sistema foi reorganizado em módulos para evitar excesso de botões na mesma tela. Comece pela importação, confira os dados e avance para diagnóstico, recuperação, TRI e coordenação.</p>
+        <div class="module-grid">
+          <button data-go="importar">📥 Importar avaliação</button>
+          <button data-go="diagnostico">📊 Ver diagnóstico</button>
+          <button data-go="recuperacao">📚 Gerar recuperação</button>
+          <button data-go="tri">📈 Analisar TRI pedagógica</button>
+          <button data-go="config">☁️ Modo institucional</button>
+        </div>
+      </div>
+      <div class="panel flow-panel">
+        <h3>Fluxo recomendado</h3>
+        <div class="flow-steps">
+          <button data-go="importar"><b>1</b><span>Importar avaliação</span></button>
+          <button data-go="diagnostico"><b>2</b><span>Conferir diagnóstico</span></button>
+          <button data-go="alunos"><b>3</b><span>Analisar alunos</span></button>
+          <button data-go="recuperacao"><b>4</b><span>Intervir e gerar ficha</span></button>
+          <button data-go="config"><b>5</b><span>Salvar local/nuvem</span></button>
+        </div>
+      </div>
+    </section>
+
+    <section id="assistente" class="view">
+      <h2>🧭 Assistente guiado</h2>
+      <p class="hint">Use este roteiro quando quiser seguir o caminho mais seguro: importar, validar, analisar, intervir e salvar. O sistema mostra o estado de cada etapa.</p>
+      <div id="wizardStatus" class="wizard-grid"></div>
+      <div class="panel">
+        <h3>Próxima ação sugerida</h3>
+        <div id="wizardNext" class="statusbox status-work">Importe uma avaliação para começar.</div>
+        <div class="actions">
+          <button data-go="importar">1. Importar</button>
+          <button id="wizardValidate" class="secondary">2. Validar estrutura</button>
+          <button id="wizardAnalyze" class="secondary">3. Ir para diagnóstico</button>
+          <button data-go="recuperacao" class="secondary">4. Gerar recuperação</button>
+          <button data-go="coordenacao" class="secondary">5. Gerar relatórios</button>
+          <button data-go="config" class="secondary">6. Salvar / sincronizar</button>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>Regra de segurança</h3>
+        <p>O diagnóstico só deve ser usado quando a validação indicar: questões, descritores, gabarito e alunos identificados. Se algo estiver faltando, volte para Importação.</p>
+      </div>
     </section>
 
     <section id="importar" class="view">
-      <h2>📤 Importar avaliação</h2>
-      <p class="hint">Modelo recomendado: 1ª linha = questões; 2ª linha = descritores; 3ª linha = gabarito; demais linhas = respostas dos alunos.</p>
-      <div class="panel">
-        <label><b>Disciplina da avaliação</b></label>
-        <select id="assessmentDiscipline">
-          <option>Língua Portuguesa</option>
-          <option>Matemática</option>
-        </select>
-        <p class="hint">A disciplina selecionada filtra automaticamente os descritores, relatórios e o Mapa da Mina.</p>
+      <h2>📥 Importação</h2>
+      <p class="hint">Escolha um caminho. O modelo recomendado é: 1ª linha = questões; 2ª linha = descritores; 3ª linha = gabarito; demais linhas = respostas dos alunos.</p>
+      <div class="panel modelbox"><h3>Identificação da avaliação</h3><p class="hint">Esses dados organizam o histórico, a coordenação e o salvamento na nuvem. O foco continua sendo importar, analisar e gerar relatórios.</p><div class="grid2"><label>Título da avaliação<input id="assessmentTitle" placeholder="Ex.: Diagnóstica - 1º bimestre"></label><label>Turma<input id="assessmentClass" placeholder="Ex.: 1º A"></label><label>Disciplina<select id="assessmentDiscipline"><option value="Língua Portuguesa">Língua Portuguesa</option><option value="Matemática">Matemática</option></select></label><label>Tipo<select id="assessmentType"><option value="diagnostica">Avaliação Diagnóstica</option><option value="simulado1">Simulado 1</option><option value="simulado2">Simulado 2</option><option value="recuperacao">Recuperação</option><option value="bimestral">Avaliação Bimestral</option></select></label><label>Data da avaliação<input id="assessmentDate" type="date"></label></div></div>
+      <div class="panel validationGate"><h3>Conferência obrigatória</h3><p class="hint">Depois de ler ou digitar os dados, o sistema precisa confirmar se encontrou questões, descritores, gabarito e alunos. O botão de confirmar só ficará ativo quando a estrutura estiver válida.</p><div id="importGate" class="statusbox status-work">Aguardando importação ou validação.</div></div>
+      <div class="import-tabs">
+        <button class="tabBtn active" data-tab="excelTab">Importar Excel</button>
+        <button class="tabBtn" data-tab="pdfTab">Importar PDF</button>
+        <button class="tabBtn" data-tab="fotoTab">Ler gabarito por foto</button>
+        <button class="tabBtn" data-tab="manualTab">Digitação manual</button>
       </div>
-      <textarea id="pasteData" placeholder="Aluno	Q1	Q2	Q3
-Descritores	D16	D4	D4
-Gabarito	C	C	C
-Ana Silva	C	D	B"></textarea>
-      <div class="actions">
-        <input type="file" id="fileInput" accept=".xlsx,.xls,.csv,.txt,.pdf,image/*">
-        <button id="extractFile">Ler arquivo</button>
-        <button id="loadExample" class="secondary">Usar exemplo</button>
-        <button id="processData">Processar dados</button>
-      </div>
-      <p id="extractStatus" class="hint">Nenhum arquivo selecionado.</p>
-      <details><summary>❓ Como deve estar o Excel?</summary><p>A primeira linha deve trazer os números das questões, como Q1, Q2, Q3. A segunda linha deve trazer os descritores. A terceira linha deve trazer o gabarito. As demais linhas devem trazer o nome do aluno e as alternativas marcadas.</p></details>
-      <div class="panel"><h3>Mapeamento das questões</h3><p class="hint">Após importar, confira os descritores de cada questão.</p><div id="questionMap" class="question-grid"></div></div>
+      <div id="excelTab" class="tabPane active panel"><h3>Importar Excel</h3><input type="file" id="fileInput" accept=".xlsx,.xls,.csv,.txt"><div class="actions"><button id="extractFile">Ler arquivo</button><button id="loadExample" class="secondary">Usar exemplo</button></div><div id="extractStatus" class="statusbox">Nenhum arquivo selecionado. Após importar, confira a validação e clique em Confirmar e analisar.</div></div>
+      <div id="pdfTab" class="tabPane panel"><h3>Importar PDF</h3><div id="pdfWarning" class="statusbox status-work">Atenção: PDF é caminho secundário. Planilhas Excel são muito mais confiáveis. Após ler PDF, confira a tabela antes de analisar.</div><p class="hint">PDFs de tabela podem falhar. O sistema tenta extrair texto, mas sempre exige conferência antes da análise.</p><input type="file" id="pdfOnlyInput" accept=".pdf"><button id="readPdfOnly">Ler PDF</button></div>
+      <div id="fotoTab" class="tabPane panel"><h3>Foto: gabarito oficial ou cartão de um aluno</h3><div id="ocrWarning" class="statusbox status-work">OCR é recurso auxiliar: use apenas para gabarito oficial ou um cartão-resposta individual. Sempre confira manualmente antes de salvar.</div><p class="hint">Use apenas para um gabarito ou um cartão-resposta por vez. Foto de turma inteira não é recomendada. Após o OCR, confira cada alternativa antes de salvar.</p><label>Tipo de registro<select id="photoRecordType"><option value="key">Gabarito oficial</option><option value="student">Aluno</option></select></label><label>Nome do aluno, quando for cartão individual<input id="photoStudentName" placeholder="Ex.: Ana Silva"></label><input id="photoKeyInput" type="file" accept="image/*" capture="environment"><div id="photoPreviewWrap" style="display:none"><img id="photoPreview" alt="Prévia da foto"></div><div class="actions"><button id="readPhotoKey">Ler foto</button><button id="savePhotoKey">Salvar registro conferido</button><button id="clearPhotoGrid" class="secondary">Limpar campos</button></div><p id="photoKeyStatus" class="hint">Nenhuma foto carregada.</p><div id="photoKeyGrid" class="photo-grid"></div><h4>Registros salvos</h4><div id="photoSavedList"></div><div class="actions"><button id="applyPhotoKey" class="secondary">Aplicar na tabela de importação</button><button id="exportPhotoModel" class="secondary">Exportar Excel</button><button id="exportPhotoPdf" class="secondary">Exportar PDF</button></div></div>
+      <div id="manualTab" class="tabPane panel"><h3>Digitação manual</h3><p class="hint">Cole ou digite a tabela. Também serve para adicionar um aluno que faltou e respondeu depois.</p><textarea id="pasteData" placeholder="Aluno\tQ1\tQ2\t...\nDescritores\tD1\tD2\t...\nGabarito\tA\tC\t...\nAna Silva\tA\tB\t..."></textarea><div class="actions"><button id="validateData">Validar estrutura</button><button id="confirmImport" disabled>Confirmar e analisar</button><button id="processData" class="secondary">Validar e confirmar</button></div><div id="validationResult"></div><div id="previewImport"></div></div>
+      <div class="panel"><h3>Mapeamento das questões</h3><p class="hint">Após importar, confira se cada questão está ligada ao descritor correto da disciplina escolhida.</p><div id="questionMap" class="question-grid"></div></div>
     </section>
 
-    <section id="alunos" class="view">
-      <h2>👨‍🎓 Análise individual</h2><p class="hint">Escolha um aluno para gerar feedback, descritores críticos e plano de suporte.</p><div class="split"><div><input id="studentSearch" placeholder="Buscar aluno..."><div id="studentList" class="list"></div></div><div id="studentDetail" class="panel empty">Selecione um aluno.</div></div>
+    <section id="diagnostico" class="view">
+      <h2>📊 Diagnóstico</h2><p class="hint">Resultado geral, semáforo pedagógico, descritores críticos e mapa de calor.</p>
+      <div id="classReport"></div>
+      <div class="panel"><h3>Mapa de calor</h3><p class="hint">Verde = acerto. Vermelho = erro. Linhas = alunos. Colunas = questões.</p><div id="heatmap" class="heatmap"></div></div>
+      <div class="panel"><h3>O que fazer amanhã?</h3><div id="tomorrowPlan"></div></div>
     </section>
 
-    <section id="turma" class="view"><h2>📊 Resultado geral da turma</h2><p class="hint">Resumo, semáforo, descritores críticos, questões com menor desempenho e mapa de calor.</p><div id="classReport"></div><div class="panel"><h3>Mapa de calor</h3><p class="hint">Verde = acerto. Vermelho = erro. Linhas = alunos. Colunas = questões.</p><div id="heatmap" class="heatmap"></div></div></section>
+    <section id="alunos" class="view"><h2>👨‍🎓 Alunos</h2><p class="hint">Selecione um aluno para ver diagnóstico individual, descritores críticos e encaminhamentos.</p><div class="split"><div><input id="studentSearch" placeholder="Buscar aluno..."><div id="studentList" class="list"></div></div><div id="studentDetail" class="panel empty">Selecione um aluno.</div></div></section>
 
-    <section id="descritores" class="view"><h2>🧩 Biblioteca de descritores</h2><p class="hint">Lista consultável com o texto do descritor, explicação, exemplos e intervenção sugerida.</p><div class="toolbar"><select id="descriptorDiscipline"><option value="todos">Português e Matemática</option><option value="Língua Portuguesa">Língua Portuguesa</option><option value="Matemática">Matemática</option></select><input id="descriptorSearch" placeholder="Buscar por D1, porcentagem, inferir..."></div><div id="descriptorList"></div></section>
+    <section id="descritores" class="view"><h2>🧩 Descritores</h2><p class="hint">Consulta por disciplina com descrição, BNCC relacionada, erros comuns, estratégias e questões associadas.</p><div class="toolbar"><select id="descriptorDiscipline"><option value="Língua Portuguesa">Língua Portuguesa</option><option value="Matemática">Matemática</option><option value="todos">Português e Matemática</option></select><input id="descriptorSearch" placeholder="Buscar por D1, inferir, porcentagem..."></div><div id="descriptorList"></div></section>
 
-    <section id="evolucao" class="view"><h2>📈 Comparar avaliações</h2><p class="hint">Salve o resultado atual como diagnóstico histórico e compare a evolução da turma.</p><div class="actions"><button id="saveSnapshot">Salvar diagnóstico atual</button><button id="clearSnapshots" class="danger">Limpar histórico</button></div><div id="history"></div></section>
+    <section id="recuperacao" class="view"><h2>📚 Recuperação e Banco de Questões</h2><p class="hint">Este é o coração da intervenção: o banco local alimenta fichas, Mapa da Mina, simulados e atividades por descritor, sem depender de IA.</p><div class="panel"><h3>Mapa da Mina</h3><label>Escolha o aluno<select id="mapStudent"><option value="">Selecione um aluno</option></select></label><div class="actions"><button id="generateMap">Gerar Mapa da Mina</button><button id="copyMap" class="secondary">Copiar</button><button id="downloadMap" class="secondary">Baixar TXT</button><button id="printMap" class="secondary">Exportar PDF</button></div><div id="mapaOutput" class="map-output empty">Selecione um aluno.</div></div>
+      <div class="panel"><h3>Ficha de exercícios individualizada</h3><p class="hint">Gera 10 questões a partir dos descritores prioritários do aluno. Quando houver questões cadastradas no banco local, elas são priorizadas.</p><label>Aluno<select id="sheetStudent"><option value="">Selecione</option></select></label><div class="actions"><button id="generateSheet">Gerar ficha</button><button id="copySheet" class="secondary">Copiar</button><button id="downloadSheet" class="secondary">Baixar TXT</button><button id="printSheet" class="secondary">Exportar PDF</button></div><textarea id="sheetOutput" class="report-output" readonly></textarea></div>
+      <div class="panel"><h3>Banco local de questões</h3><p class="hint">Cadastre questões próprias da escola por descritor. O banco alimenta fichas, recuperação, simulados e avaliações sem IA.</p><div class="bank-form"><select id="bankDisc"><option value="Língua Portuguesa">Língua Portuguesa</option><option value="Matemática">Matemática</option></select><input id="bankDesc" placeholder="Descritor, ex.: D15"><select id="bankDiff"><option>Fácil</option><option selected>Média</option><option>Difícil</option></select><select id="bankKey"><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option></select><textarea id="bankText" placeholder="Enunciado da questão"></textarea><textarea id="bankAlts" placeholder="A) ...\nB) ...\nC) ...\nD) ...\nE) ..."></textarea></div><div class="actions"><button id="addBankQuestion">Adicionar ao banco</button><button id="exportBank" class="secondary">Exportar banco</button><input type="file" id="importBank" accept=".json"></div><div id="bankList"></div></div></section>
 
-    <section id="relatorios" class="view"><h2>📄 Relatórios</h2><p class="hint">Os relatórios usam a disciplina selecionada e os descritores correspondentes.</p><div class="cards small"><button data-report="turma">Relatório da turma</button><button data-report="familia">Relatório para família</button><button data-report="conselho">Conselho de classe</button><button data-report="coordenacao">Coordenação</button></div><textarea id="reportOutput" readonly placeholder="O relatório aparecerá aqui."></textarea><div class="actions"><button id="copyReport">Copiar relatório</button><button id="downloadReport">Baixar TXT</button><button onclick="window.print()">Imprimir / PDF</button></div></section>
+    <section id="tri" class="view"><h2>📈 TRI pedagógica</h2><p class="hint">Análise pedagógica da própria prova: dificuldade do item, discriminação e coerência do padrão de acertos. Não substitui a TRI oficial.</p><div id="triOutput" class="panel">Importe os dados para gerar a análise.</div></section>
 
-    <section id="amanha" class="view"><h2>🎯 O que fazer amanhã?</h2><p class="hint">Sugestão prática com base nos descritores mais críticos da turma.</p><div id="tomorrowPlan" class="panel"></div></section>
+    <section id="coordenacao" class="view"><h2>🏫 Coordenação</h2><p class="hint">Área para leitura gestora: turmas críticas, descritores críticos, alunos prioritários e evolução geral.</p><div id="coordDashboard"></div><div id="disciplineComparison" class="panel"></div><div id="cloudCoordDashboard" class="panel"></div><div class="panel"><h3>Histórico de avaliações</h3><p class="hint">Salve momentos como Avaliação Diagnóstica, Simulado 1, Simulado 2 ou Recuperação.</p><input id="snapshotName" placeholder="Nome da avaliação, ex.: Simulado 1"><div class="actions"><button id="saveSnapshot">Salvar diagnóstico atual</button><button id="clearSnapshots" class="danger">Limpar histórico</button></div><div id="history"></div></div><div class="panel"><h3>Relatórios</h3><label>Aluno para relatório individual<select id="reportStudent"><option value="0">Primeiro aluno</option></select></label><div class="cards small"><button data-report="turma">Turma</button><button data-report="individual">Individual</button><button data-report="familia">Pais</button><button data-report="conselho">Conselho</button><button data-report="coordenacao">Coordenação</button></div><textarea id="reportOutput" class="report-output" readonly placeholder="O relatório aparecerá aqui."></textarea><div class="actions"><button id="copyReport">Copiar</button><button id="downloadReport">Baixar TXT</button><button id="exportReportPdf">Exportar PDF</button></div></div></section>
 
-    <section id="mapa" class="view">
-      <h2>🗺️ Mapa da Mina</h2>
-      <p class="hint">Plano individualizado por aluno, com cronograma de 4 semanas e 10 questões baseadas nos descritores prioritários.</p>
-      <div class="panel accent-panel">
-        <label><b>Aluno</b></label>
-        <select id="mapStudent"><option value="">Selecione um aluno</option></select>
-        <div class="actions">
-          <button id="generateMap">Gerar Mapa da Mina</button>
-          <button id="generateLocalQuestions" class="highlightBtn">Gerar 10 questões locais</button>
-        </div>
-        <p class="hint">Funcionamento local, sem IA e sem custo. As questões são geradas a partir dos descritores prioritários do aluno.</p>
-      </div>
-      <div id="mapaOutput" class="panel empty">Selecione um aluno e clique em uma opção.</div>
-      <div class="actions"><button id="copyMap">Copiar Mapa da Mina</button><button id="downloadMap">Baixar TXT</button></div>
-    </section>
-
-
-    <section id="foto" class="view">
-      <h2>📷 Gabarito e respostas por foto</h2>
-      <p class="hint">Use esta tela para cadastrar o gabarito oficial ou as respostas de cada aluno. O professor pode digitar manualmente ou enviar uma foto da folha/cartão-resposta. Antes de salvar, sempre confira as 26 alternativas.</p>
-      <div class="panel accent-panel">
+    <section id="config" class="view"><h2>⚙️ Configurações e backup</h2><div class="panel"><p>Os dados ficam salvos no navegador deste aparelho. Só são apagados se você solicitar.</p><label>Disciplina padrão<select id="configDiscipline"><option value="Língua Portuguesa">Língua Portuguesa</option><option value="Matemática">Matemática</option></select></label><div class="actions"><button id="exportJson">Exportar backup JSON</button><button id="exportFullBackup" class="secondary">Backup completo JSON</button><button id="exportExcelBackup" class="secondary">Backup Excel</button><input type="file" id="importJson" accept=".json"><input type="file" id="importFullBackup" accept=".json"><button id="restoreBackup" class="secondary">Restaurar backup completo</button><button id="clearAll" class="danger">Apagar todos os dados</button></div><p id="backupStatus" class="hint"></p></div>
+      <div class="panel cloud-panel">
+        <h3>☁️ Modo institucional — Supabase</h3>
+        <p class="hint">O sistema continua funcionando localmente. Ao fazer login, você poderá salvar avaliações na nuvem, carregar turmas vinculadas e permitir que outros professores visualizem seus dados sem alterá-los.</p>
+        <div class="cloud-config-box"><h4>Configuração do Supabase</h4><p class="hint">Cole apenas a URL do projeto e a chave pública anon. Nunca use chave secreta/service role no GitHub Pages.</p><div class="grid2"><label>URL do Supabase<input id="supabaseUrl" placeholder="https://seu-projeto.supabase.co"></label><label>Anon public key<input id="supabaseAnonKey" placeholder="eyJhbGci..."></label></div><div class="actions"><button id="saveSupabaseConfig" class="secondary">Salvar configuração</button><button id="testSupabaseConfig" class="secondary">Testar conexão</button></div></div>
+        <div id="cloudStatus" class="statusbox status-work">Modo local ativo. Faça login para sincronizar.</div>
         <div class="grid2">
-          <label><b>Tipo de registro</b>
-            <select id="photoRecordType">
-              <option value="student">Resposta de aluno</option>
-              <option value="key">Gabarito oficial</option>
-            </select>
-          </label>
-          <label><b>Nome do aluno</b>
-            <input id="photoStudentName" placeholder="Ex.: Ana Clara" autocomplete="off">
-          </label>
+          <label>E-mail<input id="cloudEmail" type="email" placeholder="professor@escola.com"></label>
+          <label>Senha<input id="cloudPassword" type="password" placeholder="Senha cadastrada no Supabase"></label>
         </div>
-        <label><b>Foto da folha ou cartão-resposta</b></label>
-        <input type="file" id="photoKeyInput" accept="image/*,.jpg,.jpeg,.png,.webp">
-        <div id="photoPreviewWrap" class="photo-preview" style="display:none"><img id="photoPreview" alt="Prévia da foto enviada"></div>
         <div class="actions">
-          <button id="readPhotoKey">Ler foto</button>
-          <button id="clearPhotoGrid" class="secondary">Limpar alternativas</button>
-          <button id="saveManualKey" class="highlightBtn">Salvar gabarito digitado</button>
-          <button id="saveManualStudent" class="highlightBtn">Salvar respostas do aluno</button>
-          <button id="applyPhotoKey">Atualizar tabela de importação</button>
-          <button id="exportPhotoModel">Exportar Excel</button>
-          <button id="exportPhotoPdf">Exportar PDF</button>
+          <button id="cloudLogin">Entrar</button>
+          <button id="cloudLogout" class="secondary">Sair</button>
+          <button id="cloudRefresh" class="secondary">Atualizar dados da nuvem</button>
         </div>
-        <p id="photoKeyStatus" class="hint">Você pode preencher manualmente ou enviar uma foto. Para aluno faltoso, digite o nome, selecione as 26 alternativas e clique em “Salvar respostas do aluno”. Para gabarito oficial, use “Salvar gabarito digitado”.</p>
+        <div id="cloudUserBox" class="cloud-user"></div>
+        <div class="grid2">
+          <label>Turma vinculada<select id="cloudTurma"><option value="">Faça login para carregar turmas</option></select></label>
+          <label>Título da avaliação<input id="cloudAssessmentTitle" placeholder="Ex.: Diagnóstica - 1º bimestre"></label><label>Data da avaliação<input id="cloudAssessmentDate" type="date"></label>
+        </div>
+        <label>Tipo de avaliação<select id="cloudAssessmentType"><option value="diagnostica">Avaliação Diagnóstica</option><option value="simulado1">Simulado 1</option><option value="simulado2">Simulado 2</option><option value="recuperacao">Recuperação</option><option value="bimestral">Avaliação Bimestral</option></select></label>
+        <div class="actions">
+          <button id="cloudSaveAssessment">Salvar avaliação atual na nuvem</button>
+          <button id="cloudLoadAssessments" class="secondary">Listar avaliações visíveis</button>
+        </div>
+        <div id="cloudAssessmentsList" class="cloud-list"></div>
       </div>
-      <div class="panel">
-        <h3>Conferência manual das 26 questões</h3>
-        <p class="hint">Selecione a alternativa marcada em cada questão. Se for resposta de aluno, informe o nome antes de salvar.</p>
-        <div id="photoKeyGrid" class="question-grid"></div>
-      </div>
-      <div class="panel">
-        <h3>Registros salvos pela foto/manual</h3>
-        <p class="hint">Esses registros ficam salvos no navegador e podem ser exportados em Excel no mesmo modelo usado pelo sistema.</p>
-        <div id="photoSavedList" class="list"></div>
-      </div>
-    </section>
+      <div id="changelogBox" class="panel"></div></section>
 
-    <section id="ficha" class="view">
-      <h2>📝 Ficha de exercícios</h2>
-      <p class="hint">Gera uma ficha individualizada com 10 questões locais, baseadas nos descritores prioritários do aluno selecionado.</p>
-      <div class="panel">
-        <label><b>Aluno</b></label>
-        <select id="sheetStudent"><option value="">Selecione um aluno</option></select>
-        <div class="actions"><button id="generateSheet">Gerar ficha</button><button id="copySheet">Copiar ficha</button><button id="downloadSheet">Baixar TXT</button></div>
-      </div>
-      <textarea id="sheetOutput" readonly placeholder="A ficha aparecerá aqui."></textarea>
-    </section>
-
-    <section id="tri" class="view">
-      <h2>📐 TRI pedagógica da prova</h2>
-      <p class="hint">Estimativa local baseada apenas nesta turma e nesta prova. Não é a TRI oficial do ENEM, mas ajuda a identificar dificuldade dos itens, coerência pedagógica e possível padrão de chute.</p>
-      <div id="triOutput" class="panel empty">Importe os dados da avaliação para gerar a análise.</div>
-    </section>
-
-    <section id="config" class="view"><h2>⚙️ Configurações e backup</h2>
-      <div class="panel"><p>Os dados ficam salvos automaticamente no navegador deste aparelho. Só são apagados se você solicitar.</p><label><b>Disciplina padrão</b></label><select id="configDiscipline"><option>Língua Portuguesa</option><option>Matemática</option></select><div class="actions"><button id="exportJson">Exportar backup JSON</button><input type="file" id="importJson" accept=".json"><button id="clearAll" class="danger">Apagar todos os dados</button></div></div>
-
-    </section>
-
-    <footer>ETE Professor José Luiz de Mendonça • Sistema Inteligente de Diagnóstico Educacional • Criado por Felipe Camargo • Versão 25.0</footer>
+    <footer>ETE Professor José Luiz de Mendonça • Criado por Felipe Camargo • Versão 39.0</footer>
   </main>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-<script src="js/app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/app.js?v=39"></script>
+<script src="js/descritores.js?v=39"></script>
+<script src="js/importacao.js?v=39"></script>
+<script src="js/diagnostico.js?v=39"></script>
+<script src="js/tri.js?v=39"></script>
+<script src="js/relatorios.js?v=39"></script>
+<script src="js/ocr.js?v=39"></script>
+<script src="js/exportacao.js?v=39"></script>
+<script src="js/banco-questoes.js?v=39"></script>
+<script src="js/supabase-sync.js?v=39"></script>
 </body>
 </html>

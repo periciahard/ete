@@ -1,50 +1,45 @@
-# Sistema Inteligente de Diagnóstico Educacional — ETE Professor José Luiz de Mendonça
+# ETE Professor José Luiz de Mendonça — Diagnóstico Pedagógico V39
 
-Criado por Felipe Camargo.
+Sistema Inteligente de Diagnóstico Educacional criado por Felipe Camargo.
 
-## Versão 25.0
+## Objetivo principal
 
-Novidades:
+Importar resultados de avaliações, analisar desempenho por aluno e por descritor, gerar relatórios pedagógicos, Mapa da Mina, fichas de exercícios e leitura gestora para coordenação.
 
-- Remoção da dependência de IA.
-- Mapa da Mina local e individualizado.
-- Ficha de exercícios individualizada por aluno.
-- TRI pedagógica da prova.
-- Leitura de gabarito por foto com OCR local no navegador.
-- Conferência manual do gabarito antes de salvar.
-- Geração de modelo Excel a partir do gabarito lido por foto.
-- Salvamento automático local.
+## Novidades V39
 
-## Modelo de Excel recomendado
+- Validação obrigatória antes da análise: relatórios só devem ser gerados com estrutura válida.
+- Assistente guiado: Importar → Validar → Diagnosticar → Intervir → Salvar.
+- Comparação Português × Matemática por turma a partir do histórico local.
+- Painel da coordenação ampliado com turma crítica, descritores críticos e leitura gestora.
+- Banco local de questões ampliado, com maior cobertura por disciplina e descritor.
+- Modo local continua sendo o fluxo principal.
+- Supabase permanece opcional e configurável pela tela de Configurações.
+- OCR continua como recurso auxiliar, sempre com conferência manual.
 
-1ª linha: número das questões: Q1, Q2, Q3...
+## Formato recomendado do Excel
 
-2ª linha: descritores de cada questão: D1, D2, D3...
+1. Primeira linha: número das questões, Q1 a Q26.
+2. Segunda linha: descritores de cada questão.
+3. Terceira linha: gabarito.
+4. Demais linhas: respostas dos alunos.
 
-3ª linha: gabarito: A, B, C, D, E...
+## Supabase
 
-Demais linhas: respostas dos alunos.
+Use apenas:
 
-Exemplo:
+- Project URL
+- Anon public key
 
-| Aluno | Q1 | Q2 | Q3 |
-|---|---|---|---|
-| Descritores | D16 | D4 | D4 |
-| Gabarito | C | C | C |
-| Ana Silva | C | D | B |
+Nunca coloque chave secreta/service role no GitHub Pages.
 
-## Publicação no GitHub Pages
+Antes de usar o modo institucional, execute o script `supabase_ete_diagnostico_schema.sql` no SQL Editor do Supabase e cadastre os usuários em Authentication. Depois cadastre os perfis e vínculos professor–turma–disciplina nas tabelas correspondentes.
 
-Envie todos os arquivos do pacote para o repositório e ative o GitHub Pages em Settings > Pages.
+## Uso recomendado
 
-
-## Versão 25.0
-- Cabeçalho fixo ao rolar a página.
-- Leitura de foto aprimorada com prévia, status de OCR, pré-processamento de imagem e mensagens de erro claras.
-- Atualização do service worker para evitar cache antigo no GitHub Pages.
-
-
-## V25
-- Salvamento manual de gabarito oficial digitado.
-- Inclusão manual de aluno faltoso, com 26 respostas.
-- Exportação dos dados em Excel e PDF.
+1. Importar avaliação.
+2. Conferir validação.
+3. Analisar diagnóstico.
+4. Gerar relatórios.
+5. Gerar recuperação/ficha.
+6. Salvar backup local ou sincronizar na nuvem.
