@@ -1,95 +1,65 @@
-# Diagnóstico Pedagógico Inteligente
+# Sistema Inteligente de Diagnóstico Educacional — ETE Professor José Luiz de Mendonça
 
-**Versão 18.0** — ETE Professor José Luiz de Mendonça
+Criado por **Felipe Camargo**.
 
-Sistema leve em HTML/CSS/JS para diagnóstico pedagógico por aluno, turma e descritor, com foco em SAEB, SAEPE, BNCC e Projeto ENEM.
+Versão **19.0**.
 
-## Recursos
+## O que esta versão faz
 
-- Painel institucional responsivo.
-- Salvamento automático no navegador.
-- Apagamento apenas por solicitação do usuário.
-- Importação por CSV ou tabela colada.
-- Mapeamento questão por questão com descritores.
-- Feedback individual automático.
-- Resultado geral da turma.
-- Semáforo pedagógico.
-- Mapa de calor.
-- Plano “O que fazer amanhã?”.
-- Botão **Mapa da Mina** com cronograma individualizado de 4 semanas, 1h de estudo + 1h de exercícios por semana e 10 questões sorteadas por descritor crítico.
-- Relatórios para turma, família, conselho de classe e coordenação.
-- Biblioteca consultável de descritores de Língua Portuguesa e Matemática do Ensino Médio.
-- PWA: pode ser instalado no celular e funciona offline depois do primeiro acesso.
+- Importa Excel no modelo da escola:
+  - linha 1: número das questões;
+  - linha 2: descritores;
+  - linha 3: gabarito;
+  - demais linhas: respostas dos alunos.
+- Permite selecionar a disciplina: **Língua Portuguesa** ou **Matemática**.
+- Filtra descritores, relatórios e intervenções pela disciplina escolhida.
+- Gera diagnóstico da turma, análise individual, relatórios e Mapa da Mina.
+- Gera Mapa da Mina individualizado por aluno.
+- Gera **10 questões individualizadas por aluno**, com base nos descritores prioritários.
+- Funciona em GitHub Pages como site estático/PWA.
+- Inclui opção de IA por:
+  1. chave informada no navegador, para testes rápidos;
+  2. backend/proxy, recomendado para uso institucional.
 
-## Como publicar no GitHub Pages
+## Publicação no GitHub Pages
 
-1. Crie um repositório no GitHub.
-2. Envie todos os arquivos desta pasta.
-3. Vá em **Settings > Pages**.
-4. Em **Build and deployment**, escolha **Deploy from a branch**.
-5. Selecione a branch `main` e a pasta `/root`.
-6. Salve.
+Envie todos os arquivos para o repositório e ative:
 
-O site ficará disponível em um endereço parecido com:
+`Settings > Pages > Deploy from branch > main > /root`
 
-`https://SEU_USUARIO.github.io/NOME_DO_REPOSITORIO/`
+## IA no GitHub Pages
 
-## Formato de importação recomendado
+O GitHub Pages é estático. Por isso, não consegue proteger uma chave de API se ela estiver escrita no código do site.
 
-Use CSV ou cole uma tabela assim:
+Para testes rápidos, o professor pode informar a chave no navegador, no campo de configuração de IA. Essa chave fica salva apenas no armazenamento local do navegador usado.
 
-```csv
-Aluno,Q1,Q2,Q3,Q4
-Maria,1,0,1,1
-João,0,1,1,0
+Para uso institucional, recomenda-se usar o backend/proxy incluído na pasta `api/`.
+
+## Backend/proxy de IA recomendado
+
+A pasta `api/openai.js` foi preparada para Vercel.
+
+Passos resumidos:
+
+1. Crie uma conta na Vercel.
+2. Importe este repositório.
+3. Configure a variável de ambiente:
+
+```text
+OPENAI_API_KEY=sua_chave_aqui
 ```
 
-Onde `1` significa acerto e `0` significa erro.
+4. Publique o projeto.
+5. Copie a URL do endpoint, por exemplo:
 
-## Observação pedagógica
+```text
+https://seu-projeto.vercel.app/api/openai
+```
 
-A biblioteca de descritores é editável nos arquivos:
+6. Cole essa URL no campo **URL do backend/proxy de IA** dentro do site.
 
-- `descritores/portugues-em.json`
-- `descritores/matematica-em.json`
+Assim, a chave fica protegida no servidor e não aparece no código público do GitHub Pages.
 
-Recomenda-se conferir e ajustar conforme a matriz vigente adotada pela rede, pelo SAEPE/CAEd e pelo SAEB/INEP.
+## Observação
 
-
-## Modelo de Excel aceito na V18
-
-O sistema agora reconhece automaticamente o modelo usado pela ETE:
-
-| Nome | Q1 | Q2 | Q3 | ... | Q26 |
-|---|---|---|---|---|---|
-| Descritores | D16 | D4 | D10 | ... | D7 |
-| Gabarito | C | A | E | ... | B |
-| Nome do aluno | C | B | E | ... | A |
-
-A leitura considera:
-
-1. primeira linha = número das questões;
-2. segunda linha = descritor vinculado a cada questão;
-3. terceira linha = gabarito oficial;
-4. demais linhas = respostas dos alunos.
-
-O sistema compara cada resposta do aluno com o gabarito e usa os descritores da segunda linha para gerar diagnóstico da turma, feedback individual e plano de intervenção.
-
-
-## Créditos
-Criado por Felipe Camargo.
-
-## Atualização V18
-- Inclusão da logo da escola.
-- Seleção de disciplina: Língua Portuguesa ou Matemática.
-- Filtro de descritores conforme a disciplina escolhida.
-- Modelo de importação: 1ª linha = questões; 2ª linha = descritores; 3ª linha = gabarito; demais linhas = respostas dos alunos.
-
-
-## Atualização V18
-- Inclusão do botão **Mapa da Mina**.
-- Geração de cronograma individualizado de 4 semanas por aluno.
-- Cada semana contém 1h de estudo e 1h de resolução de exercícios.
-- Geração automática de 10 questões sorteadas entre os descritores em que o aluno apresentou dificuldade.
-- Ajuste das cores para combinar com a logo da escola: azul-marinho, verde, amarelo e vermelho.
-- Mantidos todos os recursos anteriores: Excel, relatórios, descritores, mapa de calor, evolução, PWA e salvamento automático.
+A geração de IA utiliza a **Responses API** da OpenAI. O endpoint local chama `https://api.openai.com/v1/responses`.

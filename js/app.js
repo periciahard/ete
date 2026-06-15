@@ -1,6 +1,6 @@
-const STORE='ete_diagnostico_v18';
-const APP_VERSION='18.0';
-let state={students:[],questions:[],map:{},answerKey:{},descriptors:[],history:[],meta:{updated:null,modelo:'',disciplina:'Língua Portuguesa',aiKey:'',aiModel:'gpt-4.1-mini'}};
+const STORE='ete_diagnostico_v19';
+const APP_VERSION='19.0';
+let state={students:[],questions:[],map:{},answerKey:{},descriptors:[],history:[],meta:{updated:null,modelo:'',disciplina:'Língua Portuguesa',aiKey:'',aiModel:'gpt-4.1-mini',aiBackendUrl:''}};
 const $=s=>document.querySelector(s); const $$=s=>[...document.querySelectorAll(s)];
 function save(){state.meta.updated=new Date().toLocaleString('pt-BR');localStorage.setItem(STORE,JSON.stringify(state));$('#lastSave').textContent='Último salvamento: '+state.meta.updated;}
 function load(){try{Object.assign(state,JSON.parse(localStorage.getItem(STORE)||'{}'))}catch(e){} state.meta=state.meta||{}; state.meta.disciplina=state.meta.disciplina||'Língua Portuguesa'; if(state.meta?.updated)$('#lastSave').textContent='Último salvamento: '+state.meta.updated; syncDisciplineControls();}
@@ -8,7 +8,7 @@ async function loadDescriptors(){try{let [p,m]=await Promise.all([fetch('descrit
 function currentDiscipline(){return state.meta?.disciplina||'Língua Portuguesa'}
 function findDescriptor(code){return state.descriptors.find(d=>d.codigo===code && d.disciplina===currentDiscipline()) || null}
 function descriptorLabel(code){const d=findDescriptor(code);return d?`${d.codigo} — ${d.texto}`:code}
-function updateAiControls(){const key=$('#aiKey'), model=$('#aiModel'), saved=$('#aiSaved'); if(key) key.value=state.meta?.aiKey||''; if(model) model.value=state.meta?.aiModel||'gpt-4.1-mini'; if(saved) saved.textContent=state.meta?.aiKey?'IA configurada neste navegador.':'IA não configurada. O Mapa da Mina usará o modo local.'}
+function updateAiControls(){const key=$('#aiKey'), model=$('#aiModel'), backend=$('#aiBackendUrl'), saved=$('#aiSaved'); if(key) key.value=state.meta?.aiKey||''; if(model) model.value=state.meta?.aiModel||'gpt-4.1-mini'; if(backend) backend.value=state.meta?.aiBackendUrl||''; if(saved){ if(state.meta?.aiBackendUrl) saved.textContent='IA configurada via backend/proxy institucional.'; else if(state.meta?.aiKey) saved.textContent='IA configurada diretamente neste navegador.'; else saved.textContent='IA não configurada. O Mapa da Mina usará o modo local.';}}
 function syncDisciplineControls(){['#assessmentDiscipline','#configDiscipline'].forEach(sel=>{let el=$(sel); if(el) el.value=currentDiscipline();}); updateAiControls();}
 function setDiscipline(v){state.meta=state.meta||{}; state.meta.disciplina=v||'Língua Portuguesa'; const dd=$('#descriptorDiscipline'); if(dd) dd.value=state.meta.disciplina; syncDisciplineControls(); save(); renderAll();}
 function pct(n,d){return d?Math.round(n/d*100):0} function level(v){return v>=70?['Consolidado','ok','🟢']:v>=40?['Em desenvolvimento','warn','🟡']:['Crítico','bad','🔴']}
@@ -374,15 +374,38 @@ function buildAiPrompt(s){
   const erros=descs.map(d=>`- ${d.codigo}: ${d.texto}. Intervenção base: ${d.intervencao||''}`).join('\n')||'Sem descritores críticos mapeados.';
   return `Você é um analista educacional especialista em SAEB, SAEPE, ENEM e intervenção pedagógica individualizada. Gere um MAPA DA MINA para um estudante da ETE Professor José Luiz de Mendonça.\n\nDisciplina: ${currentDiscipline()}\nAluno: ${s.name}\nDesempenho: ${c.ac}/${c.total} acertos (${c.p}%) - ${l[0]}\nDescritores com dificuldade:\n${erros}\n\nEntregue em português do Brasil, com linguagem objetiva para professor. Estrutura obrigatória:\n1. Diagnóstico individual breve.\n2. Cronograma de 4 semanas. Em cada semana: 1h de estudo + 1h de resolução de exercícios.\n3. Estratégia de acompanhamento do professor.\n4. Gere 10 questões inéditas, contextualizadas, de múltipla escolha, sorteadas/variadas entre os descritores de dificuldade, com gabarito ao final.\n5. Não cite que é IA. Não invente dados pessoais. Use apenas os descritores informados.`;
 }
-async function callOpenAIForMapa(s){
-  const key=(state.meta?.aiKey||'').trim();
-  if(!key) throw new Error('Configure a chave da IA em Configurações ou use o modo local.');
+function extractResponseText(data){
+  return data.output_text || (data.output||[]).flatMap(o=>o.content||[]).map(c=>c.text||c?.text?.value||'').join('\n') || data.text || data.content || 'A IA respondeu, mas o texto não pôde ser lido.';
+}
+async function callOpenAI(prompt, maxTokens=4200){
+  const backend=(state.meta?.aiBackendUrl||'').trim();
   const model=(state.meta?.aiModel||'gpt-4.1-mini').trim();
-  const res=await fetch('https://api.openai.com/v1/responses',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model,input:buildAiPrompt(s),temperature:0.7,max_output_tokens:3500})});
+  if(backend){
+    const res=await fetch(backend,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model,prompt,max_output_tokens:maxTokens})});
+    if(!res.ok){let t=await res.text(); throw new Error('Falha no backend de IA: '+res.status+' '+t.slice(0,220));}
+    const data=await res.json();
+    return data.text || extractResponseText(data);
+  }
+  const key=(state.meta?.aiKey||'').trim();
+  if(!key) throw new Error('Configure a URL do backend/proxy de IA ou uma chave OpenAI para testes no navegador.');
+  const res=await fetch('https://api.openai.com/v1/responses',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model,input:prompt,temperature:0.7,max_output_tokens:maxTokens})});
   if(!res.ok){let t=await res.text(); throw new Error('Falha na IA: '+res.status+' '+t.slice(0,220));}
   const data=await res.json();
-  return data.output_text || (data.output||[]).flatMap(o=>o.content||[]).map(c=>c.text||'').join('\n') || 'A IA respondeu, mas o texto não pôde ser lido.';
+  return extractResponseText(data);
 }
+async function callOpenAIForMapa(s){
+  return callOpenAI(buildAiPrompt(s),4500);
+}
+
+async function generateQuestionsAI(){
+  const sel=$('#mapStudent'); const out=$('#mapaOutput'); if(!sel||!out) return;
+  const s=state.students[Number(sel.value)];
+  if(!s){out.classList.add('empty'); out.innerHTML='Selecione um aluno para gerar as 10 questões individualizadas com IA.'; return;}
+  out.classList.remove('empty'); out.innerHTML='<p class="hint">Gerando 10 questões individualizadas com IA... aguarde.</p>';
+  try{const txt=await callOpenAI(buildAiQuestionsPrompt(s),5200); out.dataset.plain=txt; out.innerHTML='<h3>10 questões individualizadas com IA — '+s.name+'</h3><div class="reportbox">'+txt.replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))+'</div>';}
+  catch(err){out.innerHTML='<h3>Não foi possível gerar questões com IA</h3><p class="hint">'+err.message+'</p><p>Gerando versão local individualizada como alternativa.</p>'; generateMapaMina();}
+}
+
 async function generateMapaMinaAI(){
   const sel=$('#mapStudent'); const out=$('#mapaOutput'); if(!sel||!out) return;
   const s=state.students[Number(sel.value)];
@@ -391,8 +414,8 @@ async function generateMapaMinaAI(){
   try{const txt=await callOpenAIForMapa(s); out.dataset.plain=txt; out.innerHTML='<h3>Mapa da Mina com IA — '+s.name+'</h3><div class="reportbox">'+txt.replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))+'</div>';}
   catch(err){out.innerHTML='<h3>Não foi possível usar a IA</h3><p class="hint">'+err.message+'</p><p>Gerando versão local individualizada como alternativa.</p>'; generateMapaMina();}
 }
-function saveAiConfig(){state.meta=state.meta||{}; state.meta.aiKey=($('#aiKey')?.value||'').trim(); state.meta.aiModel=($('#aiModel')?.value||'gpt-4.1-mini').trim()||'gpt-4.1-mini'; save(); updateAiControls();}
-function clearAiConfig(){state.meta.aiKey=''; save(); updateAiControls();}
+function saveAiConfig(){state.meta=state.meta||{}; state.meta.aiBackendUrl=($('#aiBackendUrl')?.value||'').trim(); state.meta.aiKey=($('#aiKey')?.value||'').trim(); state.meta.aiModel=($('#aiModel')?.value||'gpt-4.1-mini').trim()||'gpt-4.1-mini'; save(); updateAiControls();}
+function clearAiConfig(){state.meta.aiKey=''; state.meta.aiBackendUrl=''; save(); updateAiControls();}
 
 function renderAll(){renderSummary();renderMap();renderStudents();renderClass();renderDescriptors();renderTomorrow();renderHistory();renderMapaMina();}
 function go(id){
@@ -415,6 +438,7 @@ $('#importJson').onchange=e=>{let f=e.target.files[0]; if(!f)return; let r=new F
 $('#copyReport').onclick=()=>navigator.clipboard.writeText($('#reportOutput').value||'');$('#downloadReport').onclick=()=>download('relatorio-diagnostico.txt',$('#reportOutput').value||'');
 if($('#generateMap')) $('#generateMap').onclick=generateMapaMina;
 if($('#generateMapAi')) $('#generateMapAi').onclick=generateMapaMinaAI;
+if($('#generateQuestionsAi')) $('#generateQuestionsAi').onclick=generateQuestionsAI;
 if($('#saveAi')) $('#saveAi').onclick=saveAiConfig;
 if($('#clearAi')) $('#clearAi').onclick=clearAiConfig;
 if($('#mapStudent')) $('#mapStudent').onchange=generateMapaMina;
