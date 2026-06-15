@@ -3,8 +3,8 @@
   "short_name": "Diagnóstico ETE",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#f6f8fb",
-  "theme_color": "#123b66",
+  "background_color": "#f7f9fc",
+  "theme_color": "#102a56",
   "description": "Sistema Inteligente de Diagnóstico Educacional - ETE Professor José Luiz de Mendonça. Criado por Felipe Camargo.",
   "icons": [
     {

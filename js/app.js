@@ -259,7 +259,7 @@ function topStudents(limit=5){return [...state.students].map(s=>({name:s.name,..
 function lowStudents(limit=10){return [...state.students].map(s=>({name:s.name,...calcStudent(s)})).sort((a,b)=>a.p-b.p).slice(0,limit)}
 function questionStats(){let n=state.students.length;return state.questions.map((q,i)=>({q,descritor:state.map[q]||'Sem descritor',gabarito:state.answerKey?.[q]||'',ac:state.students.reduce((a,s)=>a+(s.answers[i]||0),0),total:n,p:pct(state.students.reduce((a,s)=>a+(s.answers[i]||0),0),n)})).sort((a,b)=>a.p-b.p)}
 function performanceBands(){let arr=state.students.map(s=>calcStudent(s).p);return {critico:arr.filter(p=>p<40).length,desenv:arr.filter(p=>p>=40&&p<70).length,consolidado:arr.filter(p=>p>=70).length}}
-function reportHeader(title){let total=state.students.length*state.questions.length, ac=state.students.reduce((a,s)=>a+calcStudent(s).ac,0), avg=pct(ac,total);let bands=performanceBands();return `${title}\nETE Professor José Luiz de Mendonça\nSistema Inteligente de Diagnóstico Educacional\nCriado por Felipe Camargo\nVersão 15.0\n\nDisciplina: ${state.meta?.disciplina||'Não informada'}\nData de geração: ${new Date().toLocaleString('pt-BR')}\nAlunos avaliados: ${state.students.length}\nQuestões analisadas: ${state.questions.length}\nTotal de respostas analisadas: ${total}\nMédia geral da turma: ${avg}%\nDistribuição: ${bands.critico} crítico(s), ${bands.desenv} em desenvolvimento, ${bands.consolidado} consolidado(s)\n`;}
+function reportHeader(title){let total=state.students.length*state.questions.length, ac=state.students.reduce((a,s)=>a+calcStudent(s).ac,0), avg=pct(ac,total);let bands=performanceBands();return `${title}\nETE Professor José Luiz de Mendonça\nSistema Inteligente de Diagnóstico Educacional\nCriado por Felipe Camargo\nVersão 16.0\n\nDisciplina: ${state.meta?.disciplina||'Não informada'}\nData de geração: ${new Date().toLocaleString('pt-BR')}\nAlunos avaliados: ${state.students.length}\nQuestões analisadas: ${state.questions.length}\nTotal de respostas analisadas: ${total}\nMédia geral da turma: ${avg}%\nDistribuição: ${bands.critico} crítico(s), ${bands.desenv} em desenvolvimento, ${bands.consolidado} consolidado(s)\n`;}
 function formatDescriptorLine(d){let info=state.descriptors.find(x=>x.codigo==d.d);return `- ${d.d}: ${d.p}% de acertos (${d.ac}/${d.total}) | Questões: ${d.qs.join(', ')}${info?` | ${info.texto}`:''}`}
 function formatQuestionLine(q){return `- ${q.q}${q.descritor&&q.descritor!='Sem descritor'?` (${q.descritor})`:''}: ${q.p}% de acertos (${q.ac}/${q.total})${q.gabarito?` | gabarito: ${q.gabarito}`:''}`}
 function interventionBlock(){let crit=descriptorStats().filter(d=>d.d!='Sem descritor').slice(0,5);if(!crit.length)return 'Não há descritores mapeados suficientes para sugerir intervenção específica.';return crit.map((d,i)=>{let info=state.descriptors.find(x=>x.codigo==d.d);return `${i+1}. ${d.d} — ${d.p}% de acertos\n   Habilidade: ${info?info.texto:'descritor não localizado na biblioteca'}\n   Ação sugerida: ${info?info.intervencao:'retomada conceitual, atividade guiada e verificação curta.'}\n   Alunos prioritários nesse descritor: ${studentsByDescriptor(d.d).slice(0,12).join(', ')||'não identificado'}`}).join('\n\n')}
@@ -284,7 +284,86 @@ function makeReport(type){
   }
   return `${reportHeader('RELATÓRIO GERAL DA TURMA')}\nLEITURA DOS RESULTADOS\nA avaliação indica desempenho médio de ${avg}%. O semáforo pedagógico mostra ${bands.critico} estudante(s) em nível crítico, ${bands.desenv} em desenvolvimento e ${bands.consolidado} consolidado(s).\n\nDESCRITORES MAIS CRÍTICOS\n${crit.map(formatDescriptorLine).join('\n')||'Não há descritores mapeados.'}\n\nQUESTÕES MAIS ERRADAS\n${qs.slice(0,10).map(formatQuestionLine).join('\n')}\n\nPONTOS FORTES DA TURMA\n${desc.filter(d=>d.d!='Sem descritor').sort((a,b)=>b.p-a.p).slice(0,5).map(formatDescriptorLine).join('\n')||'Não há dados suficientes.'}\n\nALUNOS COM MAIOR DESEMPENHO\n${best}\n\nALUNOS QUE NECESSITAM DE APOIO IMEDIATO\n${attention}\n\nO QUE FAZER NAS PRÓXIMAS AULAS\n${interventionBlock()}\n\nSUGESTÃO DE ROTINA\n1. Retomada rápida do descritor mais crítico.\n2. Exercício-modelo resolvido com a turma.\n3. Atividade em duplas por nível de dificuldade.\n4. Correção comentada.\n5. Nova verificação curta com 3 a 5 itens.`;
 }
-function renderAll(){renderSummary();renderMap();renderStudents();renderClass();renderDescriptors();renderTomorrow();renderHistory();}
+
+function shuffleDeterministic(arr, seedText){
+  let seed=0; String(seedText||'').split('').forEach(ch=>seed=(seed*31+ch.charCodeAt(0))>>>0);
+  let a=[...arr];
+  for(let i=a.length-1;i>0;i--){seed=(seed*1664525+1013904223)>>>0;let j=seed%(i+1);[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+function criticalDescriptorObjectsForStudent(s){
+  if(!s) return [];
+  const codes=[];
+  s.answers.forEach((v,i)=>{if(!v){let q=state.questions[i]; let d=state.map[q]; if(d && d!='Sem descritor') codes.push(d);}});
+  let uniq=[...new Set(codes)];
+  // prioriza descritores com mais erros do aluno e menor desempenho da turma
+  const stats=Object.fromEntries(descriptorStats().map(d=>[d.d,d.p]));
+  uniq.sort((a,b)=>{
+    const ea=codes.filter(x=>x===a).length, eb=codes.filter(x=>x===b).length;
+    return (eb-ea) || ((stats[a]??100)-(stats[b]??100));
+  });
+  if(!uniq.length){
+    uniq=descriptorStats().filter(d=>d.d!='Sem descritor').slice(0,4).map(d=>d.d);
+  }
+  return uniq.map(code=>state.descriptors.find(d=>d.codigo===code && d.disciplina===(state.meta?.disciplina||d.disciplina)) || state.descriptors.find(d=>d.codigo===code) || {codigo:code,texto:'Descritor não localizado na biblioteca.',explicacao:'Retomar a habilidade associada à questão.',intervencao:'Resolver exercícios guiados e fazer correção comentada.',disciplina:state.meta?.disciplina||'Disciplina'});
+}
+function descriptorQuestionText(desc, n){
+  const disciplina=(state.meta?.disciplina||'').toLowerCase();
+  const cod=desc?.codigo||'D?';
+  const texto=desc?.texto||'habilidade avaliada';
+  const baseLP=[
+    `Leia um texto curto escolhido pelo professor e identifique a informação central relacionada ao descritor ${cod}. Explique qual trecho sustenta sua resposta.`,
+    `Em uma notícia, crônica ou artigo de opinião, localize uma pista textual que ajude a resolver a habilidade: ${texto}.`,
+    `Compare duas alternativas de resposta para uma questão do tipo ${cod} e justifique por que uma delas é mais adequada.`,
+    `Leia um parágrafo e destaque três palavras-chave que conduzem à interpretação correta exigida pelo descritor ${cod}.`,
+    `Produza uma resposta curta explicando a finalidade, ideia principal ou inferência solicitada pela habilidade: ${texto}.`
+  ];
+  const baseMat=[
+    `Resolva uma situação-problema contextualizada envolvendo ${texto}. Registre os dados, a estratégia e a resposta final.`,
+    `Crie uma representação, tabela, gráfico, expressão ou cálculo que ajude a resolver uma questão associada ao descritor ${cod}.`,
+    `Analise uma resolução errada de um colega para uma questão do descritor ${cod} e corrija o erro cometido.`,
+    `Elabore um problema simples do cotidiano que utilize a habilidade: ${texto}. Em seguida, resolva-o.`,
+    `Resolva uma questão de múltipla escolha sobre ${texto} e explique por que as demais alternativas estão incorretas.`
+  ];
+  const base=disciplina.includes('matem')?baseMat:baseLP;
+  return base[(n-1)%base.length];
+}
+function generateTenQuestions(descs, studentName){
+  let pool=[];
+  descs.forEach(d=>{for(let i=1;i<=4;i++) pool.push({d,n:i});});
+  if(!pool.length) pool=[{d:{codigo:'D?',texto:'habilidade prioritária'},n:1}];
+  pool=shuffleDeterministic(pool, studentName).slice(0,10);
+  while(pool.length<10) pool.push(pool[pool.length%Math.max(1,pool.length)]);
+  return pool.map((item,i)=>({num:i+1,descritor:item.d.codigo,texto:item.d.texto,questao:descriptorQuestionText(item.d,i+1)}));
+}
+function plainMapaMina(s){
+  if(!s) return 'Selecione um aluno para gerar o Mapa da Mina.';
+  const c=calcStudent(s), l=level(c.p), descs=criticalDescriptorObjectsForStudent(s).slice(0,5), qs=generateTenQuestions(descs,s.name);
+  const foco=descs.map(d=>`${d.codigo} — ${d.texto}`).join('\n');
+  const semanas=descs.length?descs:[{codigo:'Revisão',texto:'retomada das habilidades com maior erro',intervencao:'revisão orientada e exercícios comentados'}];
+  return `MAPA DA MINA — PLANO INDIVIDUALIZADO DE 4 SEMANAS\nETE Professor José Luiz de Mendonça\nCriado por Felipe Camargo\n\nAluno(a): ${s.name}\nDisciplina: ${state.meta?.disciplina||'Não informada'}\nDesempenho atual: ${c.ac}/${c.total} acertos (${c.p}%) — ${l[0]}\n\nDescritores prioritários:\n${foco||'Sem descritor crítico mapeado.'}\n\nCronograma de 4 semanas\n\nSemana 1\n1h de estudo: retomada guiada do descritor ${semanas[0].codigo}, com leitura da habilidade, exemplo resolvido e registro dos erros mais comuns.\n1h de exercícios: resolver 3 a 5 itens do descritor ${semanas[0].codigo}, com correção comentada.\n\nSemana 2\n1h de estudo: aprofundamento do descritor ${semanas[1%semanas.length].codigo}, usando resumo, mapa mental ou exemplo-modelo.\n1h de exercícios: lista curta com questões do descritor ${semanas[1%semanas.length].codigo} e retomada dos erros da semana anterior.\n\nSemana 3\n1h de estudo: revisão combinada dos descritores ${semanas.slice(0,3).map(d=>d.codigo).join(', ')}, priorizando as habilidades com menor acerto.\n1h de exercícios: simulado curto misto, com correção por alternativa e registro das dúvidas.\n\nSemana 4\n1h de estudo: revisão final dos descritores críticos e organização das estratégias de resolução.\n1h de exercícios: nova verificação com 10 itens e comparação com o diagnóstico inicial.\n\n10 questões sorteadas entre os descritores de dificuldade\n${qs.map(q=>`${q.num}. [${q.descritor}] ${q.questao}`).join('\n')}\n\nOrientação ao professor\nAcompanhar semanalmente se o aluno reduziu erros nos descritores indicados. Se houver avanço, migrar para questões médias; se persistir a dificuldade, realizar intervenção em dupla produtiva ou atendimento individual curto.`;
+}
+function renderMapaSelect(){
+  const sel=$('#mapStudent'); if(!sel) return;
+  const current=sel.value;
+  sel.innerHTML='<option value="">Selecione um aluno</option>'+state.students.map((s,i)=>`<option value="${i}">${s.name}</option>`).join('');
+  if(current && state.students[current]) sel.value=current;
+}
+function renderMapaMina(){
+  renderMapaSelect();
+}
+function generateMapaMina(){
+  const sel=$('#mapStudent'); const out=$('#mapaOutput'); if(!sel||!out) return;
+  const s=state.students[Number(sel.value)];
+  if(!s){out.classList.add('empty'); out.innerHTML='Selecione um aluno para gerar o plano individualizado.'; return;}
+  const c=calcStudent(s), l=level(c.p), descs=criticalDescriptorObjectsForStudent(s).slice(0,5), qs=generateTenQuestions(descs,s.name);
+  const weeks=[0,1,2,3].map(i=>descs[i%Math.max(1,descs.length)] || {codigo:'Revisão',texto:'retomada das habilidades com maior erro',intervencao:'revisão orientada e exercícios comentados'});
+  out.classList.remove('empty');
+  out.dataset.plain=plainMapaMina(s);
+  out.innerHTML=`<h3>Mapa da Mina — ${s.name}</h3><div class="map-summary"><div><b>${c.ac}/${c.total}</b><br><span>Acertos</span></div><div><b>${c.p}%</b><br><span>Desempenho</span></div><div><b>${l[2]} ${l[0]}</b><br><span>Status</span></div></div><h4>Descritores prioritários</h4>${descs.map(d=>`<p><b>${d.codigo}</b> — ${d.texto}<br><span class="hint">${d.intervencao||'Retomada com exercícios comentados.'}</span></p>`).join('')||'<p class="hint">Sem descritor crítico mapeado.</p>'}<h4>Cronograma de 4 semanas</h4>${weeks.map((d,i)=>`<div class="week"><h4>Semana ${i+1} — foco em ${d.codigo}</h4><p><b>1h de estudo:</b> ${i===0?'retomada guiada da habilidade, exemplo resolvido e identificação dos erros mais comuns.':i===1?'aprofundamento com resumo, mapa mental ou exemplo-modelo.':i===2?'revisão combinada dos descritores críticos, priorizando o raciocínio de resolução.':'revisão final e organização das estratégias de prova.'}</p><p><b>1h de resolução de exercícios:</b> ${i===3?'nova verificação com 10 itens e comparação com o diagnóstico inicial.':'lista curta de questões do descritor, com correção comentada e registro das dúvidas.'}</p><p class="hint"><b>Habilidade:</b> ${d.texto}</p></div>`).join('')}<h4>10 questões sorteadas</h4>${qs.map(q=>`<div class="question-card"><b>${q.num}. [${q.descritor}]</b><p>${q.questao}</p><small>${q.texto}</small></div>`).join('')}<div class="panel"><b>Orientação ao professor:</b><p>Acompanhar semanalmente se o aluno reduziu erros nos descritores indicados. Se houver avanço, aumentar a complexidade das questões; se persistir a dificuldade, realizar intervenção em dupla produtiva ou atendimento individual curto.</p></div>`;
+}
+
+function renderAll(){renderSummary();renderMap();renderStudents();renderClass();renderDescriptors();renderTomorrow();renderHistory();renderMapaMina();}
 function go(id){$$('.view').forEach(v=>v.classList.toggle('active',v.id==id));$$('.nav').forEach(b=>b.classList.toggle('active',b.dataset.view==id));renderAll();}
 document.addEventListener('click',e=>{let goid=e.target.dataset.go||e.target.dataset.view;if(goid)go(goid); if(e.target.dataset.report)$('#reportOutput').value=makeReport(e.target.dataset.report)});
 $('#processData').onclick=()=>parseData($('#pasteData').value);$('#loadExample').onclick=()=>{$('#pasteData').value='Nome,Q1,Q2,Q3,Q4,Q5,Q6,Q7,Q8\nDescritores,D16,D4,D4,D16,D19,D15,D5,D10\nGabarito,C,C,C,C,C,D,A,B\nAna Silva,C,D,B,B,A,B,A,B\nBruno Souza,E,B,E,B,D,D,B,B\nCarla Lima,C,C,C,D,C,D,A,A\nDiego Costa,B,C,A,C,E,D,C,B';parseData($('#pasteData').value)};
@@ -297,6 +376,10 @@ $('#clearAll').onclick=()=>{if(confirm('Apagar todos os dados salvos?')){localSt
 $('#exportJson').onclick=()=>download('backup-diagnostico-ete.json',JSON.stringify(state,null,2));
 $('#importJson').onchange=e=>{let f=e.target.files[0]; if(!f)return; let r=new FileReader(); r.onload=()=>{state=JSON.parse(r.result);save();renderAll()}; r.readAsText(f)};
 $('#copyReport').onclick=()=>navigator.clipboard.writeText($('#reportOutput').value||'');$('#downloadReport').onclick=()=>download('relatorio-diagnostico.txt',$('#reportOutput').value||'');
+if($('#generateMap')) $('#generateMap').onclick=generateMapaMina;
+if($('#mapStudent')) $('#mapStudent').onchange=generateMapaMina;
+if($('#copyMap')) $('#copyMap').onclick=()=>navigator.clipboard.writeText($('#mapaOutput')?.dataset?.plain||$('#mapaOutput')?.innerText||'');
+if($('#downloadMap')) $('#downloadMap').onclick=()=>download('mapa-da-mina.txt',$('#mapaOutput')?.dataset?.plain||$('#mapaOutput')?.innerText||'');
 function download(name,text){let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:'text/plain;charset=utf-8'}));a.download=name;a.click();URL.revokeObjectURL(a.href)}
 if('serviceWorker' in navigator)navigator.serviceWorker.register('service-worker.js').catch(()=>{});
 load();loadDescriptors().then(()=>{syncDisciplineControls();renderAll();});

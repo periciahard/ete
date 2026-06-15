@@ -1,6 +1,6 @@
 # Diagnóstico Pedagógico Inteligente
 
-**Versão 15.0** — ETE Professor José Luiz de Mendonça
+**Versão 16.0** — ETE Professor José Luiz de Mendonça
 
 Sistema leve em HTML/CSS/JS para diagnóstico pedagógico por aluno, turma e descritor, com foco em SAEB, SAEPE, BNCC e Projeto ENEM.
 
@@ -16,6 +16,7 @@ Sistema leve em HTML/CSS/JS para diagnóstico pedagógico por aluno, turma e des
 - Semáforo pedagógico.
 - Mapa de calor.
 - Plano “O que fazer amanhã?”.
+- Botão **Mapa da Mina** com cronograma individualizado de 4 semanas, 1h de estudo + 1h de exercícios por semana e 10 questões sorteadas por descritor crítico.
 - Relatórios para turma, família, conselho de classe e coordenação.
 - Biblioteca consultável de descritores de Língua Portuguesa e Matemática do Ensino Médio.
 - PWA: pode ser instalado no celular e funciona offline depois do primeiro acesso.
@@ -83,3 +84,12 @@ Criado por Felipe Camargo.
 - Seleção de disciplina: Língua Portuguesa ou Matemática.
 - Filtro de descritores conforme a disciplina escolhida.
 - Modelo de importação: 1ª linha = questões; 2ª linha = descritores; 3ª linha = gabarito; demais linhas = respostas dos alunos.
+
+
+## Atualização V16
+- Inclusão do botão **Mapa da Mina**.
+- Geração de cronograma individualizado de 4 semanas por aluno.
+- Cada semana contém 1h de estudo e 1h de resolução de exercícios.
+- Geração automática de 10 questões sorteadas entre os descritores em que o aluno apresentou dificuldade.
+- Ajuste das cores para combinar com a logo da escola: azul-marinho, verde, amarelo e vermelho.
+- Mantidos todos os recursos anteriores: Excel, relatórios, descritores, mapa de calor, evolução, PWA e salvamento automático.

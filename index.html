@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#123b66">
+  <meta name="theme-color" content="#102a56">
   <title>ETE Professor José Luiz de Mendonça | Diagnóstico Pedagógico</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="css/style.css">
@@ -19,6 +19,7 @@
       <button class="nav" data-view="descritores">🧩 Descritores</button>
       <button class="nav" data-view="evolucao">📈 Evolução</button>
       <button class="nav" data-view="relatorios">📄 Relatórios</button>
+      <button class="nav" data-view="mapa">🗺️ Mapa da Mina</button>
       <button class="nav" data-view="amanha">🎯 O que fazer amanhã?</button>
       <button class="nav" data-view="config">⚙️ Configurações</button>
     </nav>
@@ -41,7 +42,7 @@
 
     <section id="inicio" class="view active">
       <div class="cards" id="summaryCards"></div>
-      <div class="panel"><h2>Transforme resultados em ações pedagógicas</h2><p>Importe ou cole os resultados questão por questão, vincule cada questão a um descritor e gere diagnósticos individuais, relatórios e planos de intervenção.</p><div class="actions"><button data-go="importar">Começar importando dados</button><button data-go="descritores" class="secondary">Consultar descritores</button></div></div>
+      <div class="panel"><h2>Transforme resultados em ações pedagógicas</h2><p>Importe ou cole os resultados questão por questão, vincule cada questão a um descritor e gere diagnósticos individuais, relatórios e planos de intervenção.</p><div class="actions"><button data-go="importar">Começar importando dados</button><button data-go="descritores" class="secondary">Consultar descritores</button><button data-go="mapa" class="secondary">Gerar Mapa da Mina</button></div></div>
     </section>
 
     <section id="importar" class="view">
@@ -66,11 +67,13 @@
 
     <section id="relatorios" class="view"><h2>📄 Relatórios</h2><div class="cards small"><button data-report="turma">Relatório da turma</button><button data-report="familia">Relatório para família</button><button data-report="conselho">Conselho de classe</button><button data-report="coordenacao">Coordenação</button></div><textarea id="reportOutput" class="report-output" readonly placeholder="O relatório aparecerá aqui."></textarea><div class="actions"><button id="copyReport">Copiar relatório</button><button id="downloadReport">Baixar TXT</button><button onclick="window.print()">Imprimir / PDF</button></div></section>
 
+    <section id="mapa" class="view"><h2>🗺️ Mapa da Mina</h2><p class="hint">Plano individualizado de 4 semanas. O professor escolhe o aluno e o sistema monta uma rotina com 1 hora de estudo e 1 hora de exercícios por semana, além de 10 questões sorteadas entre os descritores em que o aluno apresentou dificuldade.</p><div class="panel"><label>Escolha o aluno<select id="mapStudent"><option value="">Selecione um aluno</option></select></label><div class="actions"><button id="generateMap">Gerar Mapa da Mina</button><button id="copyMap" class="secondary">Copiar plano</button><button id="downloadMap" class="secondary">Baixar TXT</button><button onclick="window.print()" class="secondary">Imprimir / PDF</button></div></div><div id="mapaOutput" class="map-output panel empty">Selecione um aluno para gerar o plano individualizado.</div></section>
+
     <section id="amanha" class="view"><h2>🎯 O que fazer amanhã?</h2><p class="hint">Sugestão prática com base nos descritores mais críticos da turma.</p><div id="tomorrowPlan" class="panel"></div></section>
 
     <section id="config" class="view"><h2>⚙️ Configurações e backup</h2><div class="panel"><p>Os dados ficam salvos automaticamente no navegador deste aparelho. Só são apagados se você solicitar.</p><label>Disciplina padrão da avaliação<select id="configDiscipline"><option value="Língua Portuguesa">Língua Portuguesa</option><option value="Matemática">Matemática</option></select></label><div class="actions"><button id="exportJson">Exportar backup JSON</button><input type="file" id="importJson" accept=".json"><button id="clearAll" class="danger">Apagar todos os dados</button></div></div></section>
 
-    <footer>ETE Professor José Luiz de Mendonça • Sistema Inteligente de Diagnóstico Educacional • Criado por Felipe Camargo • Versão 15.0 GitHub/PWA</footer>
+    <footer>ETE Professor José Luiz de Mendonça • Sistema Inteligente de Diagnóstico Educacional • Criado por Felipe Camargo • Versão 16.0 GitHub/PWA</footer>
   </main>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
