@@ -1,6 +1,6 @@
-const STORE='ete_diagnostico_v19';
-const APP_VERSION='20.0';
-let state={students:[],questions:[],map:{},answerKey:{},descriptors:[],history:[],meta:{updated:null,modelo:'',disciplina:'Língua Portuguesa',aiKey:'',aiModel:'gpt-4.1-mini',aiBackendUrl:''}};
+const STORE='ete_diagnostico_v23';
+const APP_VERSION='23.0';
+let state={students:[],questions:[],map:{},answerKey:{},photoKey:[],descriptors:[],history:[],meta:{updated:null,modelo:'',disciplina:'Língua Portuguesa'}};
 const $=s=>document.querySelector(s); const $$=s=>[...document.querySelectorAll(s)];
 function save(){state.meta.updated=new Date().toLocaleString('pt-BR');localStorage.setItem(STORE,JSON.stringify(state));$('#lastSave').textContent='Último salvamento: '+state.meta.updated;}
 function load(){try{Object.assign(state,JSON.parse(localStorage.getItem(STORE)||'{}'))}catch(e){} state.meta=state.meta||{}; state.meta.disciplina=state.meta.disciplina||'Língua Portuguesa'; if(state.meta?.updated)$('#lastSave').textContent='Último salvamento: '+state.meta.updated; syncDisciplineControls();}
@@ -8,7 +8,7 @@ async function loadDescriptors(){try{let [p,m]=await Promise.all([fetch('descrit
 function currentDiscipline(){return state.meta?.disciplina||'Língua Portuguesa'}
 function findDescriptor(code){return state.descriptors.find(d=>d.codigo===code && d.disciplina===currentDiscipline()) || null}
 function descriptorLabel(code){const d=findDescriptor(code);return d?`${d.codigo} — ${d.texto}`:code}
-function updateAiControls(){const key=$('#aiKey'), model=$('#aiModel'), backend=$('#aiBackendUrl'), saved=$('#aiSaved'); if(key) key.value=state.meta?.aiKey||''; if(model) model.value=state.meta?.aiModel||'gpt-4.1-mini'; if(backend) backend.value=state.meta?.aiBackendUrl||''; if(saved){ if(state.meta?.aiBackendUrl) saved.textContent='IA configurada via backend/proxy institucional.'; else if(state.meta?.aiKey) saved.textContent='IA configurada diretamente neste navegador.'; else saved.textContent='IA não configurada. O Mapa da Mina usará o modo local.';}}
+function updateAiControls(){}
 function syncDisciplineControls(){['#assessmentDiscipline','#configDiscipline'].forEach(sel=>{let el=$(sel); if(el) el.value=currentDiscipline();}); updateAiControls();}
 function setDiscipline(v){state.meta=state.meta||{}; state.meta.disciplina=v||'Língua Portuguesa'; const dd=$('#descriptorDiscipline'); if(dd) dd.value=state.meta.disciplina; syncDisciplineControls(); save(); renderAll();}
 function pct(n,d){return d?Math.round(n/d*100):0} function level(v){return v>=70?['Consolidado','ok','🟢']:v>=40?['Em desenvolvimento','warn','🟡']:['Crítico','bad','🔴']}
@@ -369,91 +369,132 @@ function generateMapaMina(){
 }
 
 
-function buildAiPrompt(s){
-  const c=calcStudent(s), l=level(c.p), descs=criticalDescriptorObjectsForStudent(s).slice(0,6);
-  const erros=descs.map(d=>`- ${d.codigo}: ${d.texto}. Intervenção base: ${d.intervencao||''}`).join('\n')||'Sem descritores críticos mapeados.';
-  return `Você é um analista educacional especialista em SAEB, SAEPE, ENEM e intervenção pedagógica individualizada. Gere um MAPA DA MINA para um estudante da ETE Professor José Luiz de Mendonça.\n\nDisciplina: ${currentDiscipline()}\nAluno: ${s.name}\nDesempenho: ${c.ac}/${c.total} acertos (${c.p}%) - ${l[0]}\nDescritores com dificuldade:\n${erros}\n\nEntregue em português do Brasil, com linguagem objetiva para professor. Estrutura obrigatória:\n1. Diagnóstico individual breve.\n2. Cronograma de 4 semanas. Em cada semana: 1h de estudo + 1h de resolução de exercícios.\n3. Estratégia de acompanhamento do professor.\n4. Gere 10 questões inéditas, contextualizadas, de múltipla escolha, sorteadas/variadas entre os descritores de dificuldade, com gabarito ao final.\n5. Não cite que é IA. Não invente dados pessoais. Use apenas os descritores informados.`;
+
+function ensurePhotoDefaults(){
+  if(!state.questions || !state.questions.length) state.questions=Array.from({length:26},(_,i)=>`Q${i+1}`);
+  state.photoKey=Array.isArray(state.photoKey)?state.photoKey:Array(26).fill('');
+  if(state.photoKey.length<state.questions.length) state.photoKey=[...state.photoKey, ...Array(state.questions.length-state.photoKey.length).fill('')];
+  state.photoRecords=Array.isArray(state.photoRecords)?state.photoRecords:[];
+  state.answerKey=state.answerKey||{};
+  state.map=state.map||{};
 }
-
-function buildAiQuestionsPrompt(s){
-  const c=calcStudent(s), l=level(c.p), descs=criticalDescriptorObjectsForStudent(s).slice(0,6);
-  const erros=descs.map(d=>`- ${d.codigo}: ${d.texto}. Explicação: ${d.explicacao||''}. Intervenção: ${d.intervencao||''}`).join('\n')||'Sem descritores críticos mapeados.';
-  return `Você é um elaborador de questões e analista educacional especialista em SAEB, SAEPE, ENEM e recomposição de aprendizagens.
-
-Tarefa: gerar EXATAMENTE 10 questões inéditas e individualizadas para o aluno abaixo, usando apenas os descritores prioritários informados.
-
-Disciplina: ${currentDiscipline()}
-Aluno: ${s.name}
-Desempenho: ${c.ac}/${c.total} acertos (${c.p}%) - ${l[0]}
-Descritores prioritários:
-${erros}
-
-Regras obrigatórias:
-1. Distribua as 10 questões entre os descritores prioritários, dando mais questões aos descritores mais críticos.
-2. Use linguagem clara, contextualizada e adequada ao Ensino Médio.
-3. Cada questão deve ter 5 alternativas (A, B, C, D, E), com apenas uma correta.
-4. Indique o descritor antes de cada questão.
-5. Ao final, apresente o gabarito e uma justificativa curta de cada resposta.
-6. Não use dados pessoais além do nome do aluno.
-7. Não cite que foi produzido por IA.
-
-Formato:
-QUESTÃO 1 — [D...]
-Enunciado...
-A) ...
-B) ...
-C) ...
-D) ...
-E) ...
-
-GABARITO COMENTADO
-1. Letra ... — justificativa...`;
+function getCurrentGridAnswers(){
+  ensurePhotoDefaults();
+  return state.questions.map((q,i)=>normAlt(document.querySelector(`[data-photo-q="${q}"]`)?.value||state.photoKey[i]||''));
 }
-
-function extractResponseText(data){
-  return data.output_text || (data.output||[]).flatMap(o=>o.content||[]).map(c=>c.text||c?.text?.value||'').join('\n') || data.text || data.content || 'A IA respondeu, mas o texto não pôde ser lido.';
+function setGridAnswers(arr){
+  ensurePhotoDefaults();
+  state.photoKey=state.questions.map((q,i)=>normAlt(arr[i]||''));
+  renderPhotoKey();
 }
-async function callOpenAI(prompt, maxTokens=4200){
-  const backend=(state.meta?.aiBackendUrl||'').trim();
-  const model=(state.meta?.aiModel||'gpt-4.1-mini').trim();
-  if(backend){
-    const res=await fetch(backend,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model,prompt,max_output_tokens:maxTokens})});
-    if(!res.ok){let t=await res.text(); throw new Error('Falha no backend de IA: '+res.status+' '+t.slice(0,220));}
-    const data=await res.json();
-    return data.text || extractResponseText(data);
+function renderPhotoKey(){
+  ensurePhotoDefaults();
+  const grid=$('#photoKeyGrid');
+  if(grid){
+    const opts=['','A','B','C','D','E'].map(x=>`<option value="${x}">${x||'—'}</option>`).join('');
+    grid.innerHTML=state.questions.map((q,i)=>`<div class="photo-q"><label>${q}</label><select data-photo-q="${q}">${opts}</select></div>`).join('');
+    state.questions.forEach((q,i)=>{const el=document.querySelector(`[data-photo-q="${q}"]`); if(el){el.value=state.photoKey[i]||''; el.onchange=()=>{state.photoKey=getCurrentGridAnswers(); save();};}});
   }
-  const key=(state.meta?.aiKey||'').trim();
-  if(!key) throw new Error('IA não configurada. No GitHub Pages, configure primeiro a URL do backend/proxy em Configurações. A pasta api/openai.js só funciona quando o projeto também é publicado na Vercel ou ambiente semelhante.');
-  const res=await fetch('https://api.openai.com/v1/responses',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model,input:prompt,temperature:0.7,max_output_tokens:maxTokens})});
-  if(!res.ok){let t=await res.text(); throw new Error('Falha na IA: '+res.status+' '+t.slice(0,220));}
-  const data=await res.json();
-  return extractResponseText(data);
+  const list=$('#photoSavedList');
+  if(list){
+    const keyCount=Object.values(state.answerKey||{}).filter(Boolean).length;
+    const rows=[`<div class="saved-row"><b>Gabarito oficial</b><small>${keyCount}/${state.questions.length} questões cadastradas</small><button data-load-key>Carregar</button></div>`]
+      .concat((state.photoRecords||[]).map((r,i)=>`<div class="saved-row"><b>${r.name}</b><small>${(r.raw||[]).filter(Boolean).length}/${state.questions.length} respostas • ${r.date||''}</small><button data-del-rec="${i}" class="danger">Excluir</button></div>`));
+    list.innerHTML=rows.join('')||'<p class="hint">Nenhum registro salvo ainda.</p>';
+    const lk=document.querySelector('[data-load-key]'); if(lk) lk.onclick=()=>{setGridAnswers(state.questions.map(q=>state.answerKey[q]||'')); $('#photoRecordType').value='key'; $('#photoStudentName').value='';};
+    document.querySelectorAll('[data-del-rec]').forEach(b=>b.onclick=()=>{const i=+b.dataset.delRec; const name=state.photoRecords[i]?.name; if(confirm(`Excluir registro de ${name}?`)){state.photoRecords.splice(i,1); const idx=state.students.findIndex(s=>s.name===name); if(idx>=0) state.students.splice(idx,1); save(); renderAll();}});
+  }
 }
-async function callOpenAIForMapa(s){
-  return callOpenAI(buildAiPrompt(s),4500);
+function extractAnswersFromText(text){
+  const cleaned=(text||'').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\bO\b/g,'0');
+  const ans=Array(state.questions?.length||26).fill('');
+  let m;
+  const re1=/\bQ?\s*(\d{1,2})\s*[:\-\.)]?\s*([ABCDE])\b/g;
+  while((m=re1.exec(cleaned))){const n=+m[1]; if(n>=1 && n<=ans.length) ans[n-1]=m[2];}
+  if(ans.filter(Boolean).length<8){
+    const letters=(cleaned.match(/\b[ABCDE]\b/g)||[]).slice(0,ans.length);
+    letters.forEach((a,i)=>ans[i]=a);
+  }
+  return ans;
+}
+async function readPhotoKey(){
+  ensurePhotoDefaults();
+  const f=$('#photoKeyInput')?.files?.[0]; const status=$('#photoKeyStatus');
+  if(!f){alert('Escolha uma foto primeiro.'); return;}
+  try{
+    if(!window.Tesseract) throw new Error('OCR não carregou. Verifique a internet ou preencha manualmente.');
+    status.textContent='Lendo foto com OCR... mantenha a página aberta.';
+    const result=await Tesseract.recognize(f,'por+eng',{logger:m=>{if(m.status)status.textContent='OCR: '+m.status+(m.progress?` ${Math.round(m.progress*100)}%`:'')}});
+    const text=result.data.text||'';
+    const ans=extractAnswersFromText(text);
+    setGridAnswers(ans);
+    const n=ans.filter(Boolean).length;
+    status.textContent=`Leitura concluída: ${n}/${state.questions.length} alternativas identificadas. Confira manualmente antes de salvar.`;
+  }catch(e){status.textContent='Não foi possível ler a foto: '+e.message;}
+}
+function recomputeStudentsFromRaw(){
+  if(!state.students) return;
+  const key=state.questions.map(q=>state.answerKey?.[q]||'');
+  state.students.forEach(s=>{ if(Array.isArray(s.raw) && s.raw.length){s.answers=s.raw.map((v,i)=>key[i] && normAlt(v)===key[i]?1:0);} });
+}
+function savePhotoKey(){
+  ensurePhotoDefaults();
+  const type=$('#photoRecordType')?.value||'student';
+  const raw=getCurrentGridAnswers();
+  const filled=raw.filter(Boolean).length;
+  if(filled===0){alert('Preencha ou leia pelo menos uma alternativa antes de salvar.'); return;}
+  if(type==='key'){
+    state.questions.forEach((q,i)=>{state.answerKey[q]=raw[i]||'';});
+    recomputeStudentsFromRaw();
+    $('#photoKeyStatus').textContent=`Gabarito oficial salvo: ${filled}/${state.questions.length} alternativas.`;
+  }else{
+    const name=normalizeCell($('#photoStudentName')?.value||'');
+    if(!name){alert('Informe o nome do aluno antes de salvar.'); return;}
+    const key=state.questions.map(q=>state.answerKey?.[q]||'');
+    if(key.filter(Boolean).length<state.questions.length){
+      if(!confirm('O gabarito oficial ainda não está completo. Salvar mesmo assim? O desempenho será recalculado quando o gabarito for informado.')) return;
+    }
+    const answers=raw.map((v,i)=>key[i] && v===key[i]?1:0);
+    const rec={name,raw,date:new Date().toLocaleString('pt-BR')};
+    const ri=(state.photoRecords||[]).findIndex(r=>r.name.toLowerCase()===name.toLowerCase());
+    if(ri>=0) state.photoRecords[ri]=rec; else state.photoRecords.push(rec);
+    const si=state.students.findIndex(s=>s.name.toLowerCase()===name.toLowerCase());
+    const student={name,answers,raw};
+    if(si>=0) state.students[si]=student; else state.students.push(student);
+    state.students=state.students.slice(0,50);
+    $('#photoKeyStatus').textContent=`Respostas de ${name} salvas: ${filled}/${state.questions.length} alternativas.`;
+  }
+  save(); renderAll();
+}
+function applyPhotoKeyToPaste(){
+  ensurePhotoDefaults();
+  const rows=[];
+  rows.push(['Aluno',...state.questions]);
+  rows.push(['Descritores',...state.questions.map(q=>state.map?.[q]||'')]);
+  rows.push(['Gabarito',...state.questions.map(q=>state.answerKey?.[q]||'')]);
+  (state.students||[]).forEach(s=>rows.push([s.name,...(s.raw&&s.raw.length?s.raw:state.questions.map((q,i)=>s.answers?.[i]?'1':'0'))]));
+  const txt=rows.map(r=>r.join('\t')).join('\n');
+  if($('#pasteData')) $('#pasteData').value=txt;
+  $('#photoKeyStatus').textContent='Tabela de importação atualizada com o gabarito e os alunos salvos.';
+}
+function exportPhotoModel(){
+  ensurePhotoDefaults();
+  const rows=[];
+  rows.push(['Aluno',...state.questions]);
+  rows.push(['Descritores',...state.questions.map(q=>state.map?.[q]||'')]);
+  rows.push(['Gabarito',...state.questions.map(q=>state.answerKey?.[q]||'')]);
+  (state.students||[]).forEach(s=>rows.push([s.name,...(s.raw&&s.raw.length?s.raw:state.questions.map((q,i)=>s.answers?.[i]?'1':'0'))]));
+  if(window.XLSX){
+    const ws=XLSX.utils.aoa_to_sheet(rows); const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'Dados'); XLSX.writeFile(wb,'dados_avaliacao_ete.xlsx');
+  }else{
+    download('dados_avaliacao_ete.csv',rows.map(r=>r.join(';')).join('\n'));
+  }
+}
+function clearPhotoGrid(){
+  ensurePhotoDefaults(); state.photoKey=Array(state.questions.length).fill(''); save(); renderPhotoKey(); const st=$('#photoKeyStatus'); if(st) st.textContent='Alternativas limpas. Preencha manualmente ou envie uma nova foto.';
 }
 
-async function generateQuestionsAI(){
-  const sel=$('#mapStudent'); const out=$('#mapaOutput'); if(!sel||!out) return;
-  const s=state.students[Number(sel.value)];
-  if(!s){out.classList.add('empty'); out.innerHTML='Selecione um aluno para gerar as 10 questões individualizadas com IA.'; return;}
-  out.classList.remove('empty'); out.innerHTML='<p class="hint">Gerando 10 questões individualizadas com IA... aguarde.</p>';
-  try{const txt=await callOpenAI(buildAiQuestionsPrompt(s),5200); out.dataset.plain=txt; out.innerHTML='<h3>10 questões individualizadas com IA — '+s.name+'</h3><div class="reportbox">'+txt.replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))+'</div>';}
-  catch(err){out.innerHTML='<h3>Não foi possível gerar questões com IA</h3><p class="hint">'+err.message+'</p><p>Gerando versão local individualizada como alternativa.</p>'; generateMapaMina();}
-}
-
-async function generateMapaMinaAI(){
-  const sel=$('#mapStudent'); const out=$('#mapaOutput'); if(!sel||!out) return;
-  const s=state.students[Number(sel.value)];
-  if(!s){out.classList.add('empty'); out.innerHTML='Selecione um aluno para gerar o plano individualizado com IA.'; return;}
-  out.classList.remove('empty'); out.innerHTML='<p class="hint">Gerando Mapa da Mina com IA... aguarde.</p>';
-  try{const txt=await callOpenAIForMapa(s); out.dataset.plain=txt; out.innerHTML='<h3>Mapa da Mina com IA — '+s.name+'</h3><div class="reportbox">'+txt.replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))+'</div>';}
-  catch(err){out.innerHTML='<h3>Não foi possível usar a IA</h3><p class="hint">'+err.message+'</p><p>Gerando versão local individualizada como alternativa.</p>'; generateMapaMina();}
-}
-function saveAiConfig(){state.meta=state.meta||{}; state.meta.aiBackendUrl=($('#aiBackendUrl')?.value||'').trim(); state.meta.aiKey=($('#aiKey')?.value||'').trim(); state.meta.aiModel=($('#aiModel')?.value||'gpt-4.1-mini').trim()||'gpt-4.1-mini'; save(); updateAiControls();}
-function clearAiConfig(){state.meta.aiKey=''; state.meta.aiBackendUrl=''; save(); updateAiControls();}
-
-function renderAll(){renderSummary();renderMap();renderStudents();renderClass();renderDescriptors();renderTomorrow();renderHistory();renderMapaMina();}
+function renderAll(){renderSummary();renderMap();renderStudents();renderClass();renderDescriptors();renderTomorrow();renderHistory();renderMapaMina();renderPhotoKey();renderFichaSelect();renderTRI();}
 function go(id){
   $$('.view').forEach(v=>{const on=v.id===id; v.classList.toggle('active',on); v.hidden=!on; v.style.display=on?'block':'none';});
   $$('.nav').forEach(b=>b.classList.toggle('active',b.dataset.view===id));
@@ -473,10 +514,15 @@ $('#exportJson').onclick=()=>download('backup-diagnostico-ete.json',JSON.stringi
 $('#importJson').onchange=e=>{let f=e.target.files[0]; if(!f)return; let r=new FileReader(); r.onload=()=>{state=JSON.parse(r.result);save();renderAll()}; r.readAsText(f)};
 $('#copyReport').onclick=()=>navigator.clipboard.writeText($('#reportOutput').value||'');$('#downloadReport').onclick=()=>download('relatorio-diagnostico.txt',$('#reportOutput').value||'');
 if($('#generateMap')) $('#generateMap').onclick=generateMapaMina;
-if($('#generateMapAi')) $('#generateMapAi').onclick=generateMapaMinaAI;
-if($('#generateQuestionsAi')) $('#generateQuestionsAi').onclick=generateQuestionsAI;
-if($('#saveAi')) $('#saveAi').onclick=saveAiConfig;
-if($('#clearAi')) $('#clearAi').onclick=clearAiConfig;
+if($('#generateLocalQuestions')) $('#generateLocalQuestions').onclick=generateLocalQuestionsOnly;
+if($('#readPhotoKey')) $('#readPhotoKey').onclick=readPhotoKey;
+if($('#clearPhotoGrid')) $('#clearPhotoGrid').onclick=clearPhotoGrid;
+if($('#savePhotoKey')) $('#savePhotoKey').onclick=savePhotoKey;
+if($('#applyPhotoKey')) $('#applyPhotoKey').onclick=applyPhotoKeyToPaste;
+if($('#exportPhotoModel')) $('#exportPhotoModel').onclick=exportPhotoModel;
+if($('#generateSheet')) $('#generateSheet').onclick=generateFicha;
+if($('#copySheet')) $('#copySheet').onclick=()=>navigator.clipboard.writeText($('#sheetOutput')?.value||'');
+if($('#downloadSheet')) $('#downloadSheet').onclick=()=>download('ficha-exercicios.txt',$('#sheetOutput')?.value||'');
 if($('#mapStudent')) $('#mapStudent').onchange=generateMapaMina;
 if($('#copyMap')) $('#copyMap').onclick=()=>navigator.clipboard.writeText($('#mapaOutput')?.dataset?.plain||$('#mapaOutput')?.innerText||'');
 if($('#downloadMap')) $('#downloadMap').onclick=()=>download('mapa-da-mina.txt',$('#mapaOutput')?.dataset?.plain||$('#mapaOutput')?.innerText||'');

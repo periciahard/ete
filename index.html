@@ -26,6 +26,9 @@
       <button class="nav" data-view="relatorios">📄 Relatórios</button>
       <button class="nav" data-view="amanha">🎯 O que fazer amanhã?</button>
       <button class="nav highlight" data-view="mapa">🗺️ Mapa da Mina</button>
+      <button class="nav" data-view="foto">📷 Gabarito por foto</button>
+      <button class="nav" data-view="ficha">📝 Ficha de exercícios</button>
+      <button class="nav" data-view="tri">📐 TRI pedagógica</button>
       <button class="nav" data-view="config">⚙️ Configurações</button>
     </nav>
   </aside>
@@ -96,29 +99,77 @@ Ana Silva	C	D	B"></textarea>
         <label><b>Aluno</b></label>
         <select id="mapStudent"><option value="">Selecione um aluno</option></select>
         <div class="actions">
-          <button id="generateMap">Gerar local</button>
-          <button id="generateMapAi" class="highlightBtn">Gerar Mapa da Mina com IA</button>
-          <button id="generateQuestionsAi" class="highlightBtn">Gerar 10 questões com IA</button>
+          <button id="generateMap">Gerar Mapa da Mina</button>
+          <button id="generateLocalQuestions" class="highlightBtn">Gerar 10 questões locais</button>
         </div>
-        <p class="hint">Sem IA configurada, use “Gerar local”. Para usar IA, configure o backend/proxy em Configurações.</p>
+        <p class="hint">Funcionamento local, sem IA e sem custo. As questões são geradas a partir dos descritores prioritários do aluno.</p>
       </div>
       <div id="mapaOutput" class="panel empty">Selecione um aluno e clique em uma opção.</div>
       <div class="actions"><button id="copyMap">Copiar Mapa da Mina</button><button id="downloadMap">Baixar TXT</button></div>
     </section>
 
-    <section id="config" class="view"><h2>⚙️ Configurações e backup</h2>
-      <div class="panel"><p>Os dados ficam salvos automaticamente no navegador deste aparelho. Só são apagados se você solicitar.</p><label><b>Disciplina padrão</b></label><select id="configDiscipline"><option>Língua Portuguesa</option><option>Matemática</option></select><div class="actions"><button id="exportJson">Exportar backup JSON</button><input type="file" id="importJson" accept=".json"><button id="clearAll" class="danger">Apagar todos os dados</button></div></div>
-      <details class="panel" open><summary>⚙️ Configurar IA para o Mapa da Mina</summary>
-        <p class="hint"><b>Importante:</b> no GitHub Pages, o site é estático. A IA só funciona se você configurar um backend/proxy, por exemplo na Vercel, ou uma chave direta de teste. O recomendado é backend/proxy para não expor a chave.</p>
-        <label>URL do backend/proxy de IA</label><input id="aiBackendUrl" placeholder="https://seu-projeto.vercel.app/api/openai">
-        <label>Chave da API OpenAI (teste direto no navegador)</label><input id="aiKey" placeholder="sk-..." type="password">
-        <label>Modelo</label><input id="aiModel" value="gpt-4.1-mini">
-        <div class="actions"><button id="saveAi">Salvar configuração local</button><button id="clearAi" class="danger">Limpar chave</button></div>
-        <p id="aiSaved" class="hint">IA não configurada.</p>
-      </details>
+
+    <section id="foto" class="view">
+      <h2>📷 Gabarito e respostas por foto</h2>
+      <p class="hint">Use esta tela para cadastrar o gabarito oficial ou as respostas de cada aluno. O professor pode digitar manualmente ou enviar uma foto da folha/cartão-resposta. Antes de salvar, sempre confira as 26 alternativas.</p>
+      <div class="panel accent-panel">
+        <div class="grid2">
+          <label><b>Tipo de registro</b>
+            <select id="photoRecordType">
+              <option value="student">Resposta de aluno</option>
+              <option value="key">Gabarito oficial</option>
+            </select>
+          </label>
+          <label><b>Nome do aluno</b>
+            <input id="photoStudentName" placeholder="Ex.: Ana Clara" autocomplete="off">
+          </label>
+        </div>
+        <label><b>Foto da folha ou cartão-resposta</b></label>
+        <input type="file" id="photoKeyInput" accept="image/*" capture="environment">
+        <div class="actions">
+          <button id="readPhotoKey">Ler foto</button>
+          <button id="clearPhotoGrid" class="secondary">Limpar alternativas</button>
+          <button id="savePhotoKey">Salvar registro conferido</button>
+          <button id="applyPhotoKey">Atualizar tabela de importação</button>
+          <button id="exportPhotoModel">Exportar Excel</button>
+        </div>
+        <p id="photoKeyStatus" class="hint">Você pode preencher manualmente ou enviar uma foto. Formatos bons: “1 A, 2 C...” ou “Q1 A, Q2 C...”.</p>
+      </div>
+      <div class="panel">
+        <h3>Conferência manual das 26 questões</h3>
+        <p class="hint">Selecione a alternativa marcada em cada questão. Se for resposta de aluno, informe o nome antes de salvar.</p>
+        <div id="photoKeyGrid" class="question-grid"></div>
+      </div>
+      <div class="panel">
+        <h3>Registros salvos pela foto/manual</h3>
+        <p class="hint">Esses registros ficam salvos no navegador e podem ser exportados em Excel no mesmo modelo usado pelo sistema.</p>
+        <div id="photoSavedList" class="list"></div>
+      </div>
     </section>
 
-    <footer>ETE Professor José Luiz de Mendonça • Sistema Inteligente de Diagnóstico Educacional • Criado por Felipe Camargo • Versão 20.0</footer>
+    <section id="ficha" class="view">
+      <h2>📝 Ficha de exercícios</h2>
+      <p class="hint">Gera uma ficha individualizada com 10 questões locais, baseadas nos descritores prioritários do aluno selecionado.</p>
+      <div class="panel">
+        <label><b>Aluno</b></label>
+        <select id="sheetStudent"><option value="">Selecione um aluno</option></select>
+        <div class="actions"><button id="generateSheet">Gerar ficha</button><button id="copySheet">Copiar ficha</button><button id="downloadSheet">Baixar TXT</button></div>
+      </div>
+      <textarea id="sheetOutput" readonly placeholder="A ficha aparecerá aqui."></textarea>
+    </section>
+
+    <section id="tri" class="view">
+      <h2>📐 TRI pedagógica da prova</h2>
+      <p class="hint">Estimativa local baseada apenas nesta turma e nesta prova. Não é a TRI oficial do ENEM, mas ajuda a identificar dificuldade dos itens, coerência pedagógica e possível padrão de chute.</p>
+      <div id="triOutput" class="panel empty">Importe os dados da avaliação para gerar a análise.</div>
+    </section>
+
+    <section id="config" class="view"><h2>⚙️ Configurações e backup</h2>
+      <div class="panel"><p>Os dados ficam salvos automaticamente no navegador deste aparelho. Só são apagados se você solicitar.</p><label><b>Disciplina padrão</b></label><select id="configDiscipline"><option>Língua Portuguesa</option><option>Matemática</option></select><div class="actions"><button id="exportJson">Exportar backup JSON</button><input type="file" id="importJson" accept=".json"><button id="clearAll" class="danger">Apagar todos os dados</button></div></div>
+
+    </section>
+
+    <footer>ETE Professor José Luiz de Mendonça • Sistema Inteligente de Diagnóstico Educacional • Criado por Felipe Camargo • Versão 23.0</footer>
   </main>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
