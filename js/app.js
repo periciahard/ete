@@ -1,5 +1,5 @@
 const STORE='ete_diagnostico_v23';
-const APP_VERSION='23.0';
+const APP_VERSION='25.0';
 let state={students:[],questions:[],map:{},answerKey:{},photoKey:[],descriptors:[],history:[],meta:{updated:null,modelo:'',disciplina:'Língua Portuguesa'}};
 const $=s=>document.querySelector(s); const $$=s=>[...document.querySelectorAll(s)];
 function save(){state.meta.updated=new Date().toLocaleString('pt-BR');localStorage.setItem(STORE,JSON.stringify(state));$('#lastSave').textContent='Último salvamento: '+state.meta.updated;}
@@ -406,31 +406,81 @@ function renderPhotoKey(){
   }
 }
 function extractAnswersFromText(text){
-  const cleaned=(text||'').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\bO\b/g,'0');
-  const ans=Array(state.questions?.length||26).fill('');
+  const total=state.questions?.length||26;
+  const ans=Array(total).fill('');
+  const cleaned=(text||'')
+    .toUpperCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[|]/g,' ')
+    .replace(/\bO\b/g,'0')
+    .replace(/\b0([1-9])\b/g,'$1');
   let m;
-  const re1=/\bQ?\s*(\d{1,2})\s*[:\-\.)]?\s*([ABCDE])\b/g;
-  while((m=re1.exec(cleaned))){const n=+m[1]; if(n>=1 && n<=ans.length) ans[n-1]=m[2];}
+  const patterns=[
+    /\bQ\s*(\d{1,2})\s*[:\-\.)]?\s*([ABCDE])\b/g,
+    /\bQUEST(?:AO|ÃO)?\s*(\d{1,2})\s*[:\-\.)]?\s*([ABCDE])\b/g,
+    /\b(\d{1,2})\s*[:\-\.)]\s*([ABCDE])\b/g,
+    /\b(\d{1,2})\s+([ABCDE])\b/g
+  ];
+  for(const re of patterns){
+    while((m=re.exec(cleaned))){const n=+m[1]; if(n>=1 && n<=total) ans[n-1]=m[2];}
+  }
   if(ans.filter(Boolean).length<8){
-    const letters=(cleaned.match(/\b[ABCDE]\b/g)||[]).slice(0,ans.length);
-    letters.forEach((a,i)=>ans[i]=a);
+    const compact=cleaned.replace(/\s+/g,' ');
+    const seq=compact.match(/\b[ABCDE](?:\s+[ABCDE]){10,}\b/);
+    const letters=(seq?seq[0].match(/[ABCDE]/g):(cleaned.match(/\b[ABCDE]\b/g)||[])).slice(0,total);
+    letters.forEach((a,i)=>{if(!ans[i]) ans[i]=a;});
   }
   return ans;
 }
+async function preprocessImageFile(file){
+  // Pré-processamento simples: amplia a foto e aumenta contraste antes do OCR.
+  const bmp=await createImageBitmap(file);
+  const maxW=1800;
+  const scale=Math.min(3, Math.max(1.2, maxW/bmp.width));
+  const canvas=document.createElement('canvas');
+  canvas.width=Math.round(bmp.width*scale); canvas.height=Math.round(bmp.height*scale);
+  const ctx=canvas.getContext('2d');
+  ctx.fillStyle='#fff'; ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.drawImage(bmp,0,0,canvas.width,canvas.height);
+  const img=ctx.getImageData(0,0,canvas.width,canvas.height);
+  const d=img.data;
+  for(let i=0;i<d.length;i+=4){
+    let g=0.299*d[i]+0.587*d[i+1]+0.114*d[i+2];
+    g=g<150?0:255;
+    d[i]=d[i+1]=d[i+2]=g;
+  }
+  ctx.putImageData(img,0,0);
+  return new Promise(resolve=>canvas.toBlob(b=>resolve(b||file),'image/png'));
+}
 async function readPhotoKey(){
   ensurePhotoDefaults();
-  const f=$('#photoKeyInput')?.files?.[0]; const status=$('#photoKeyStatus');
+  const input=$('#photoKeyInput');
+  const f=input?.files?.[0]; const status=$('#photoKeyStatus'); const btn=$('#readPhotoKey');
+  const setStatus=(txt,cls='status-work')=>{ if(status){status.className='hint '+cls; status.textContent=txt;} };
   if(!f){alert('Escolha uma foto primeiro.'); return;}
   try{
-    if(!window.Tesseract) throw new Error('OCR não carregou. Verifique a internet ou preencha manualmente.');
-    status.textContent='Lendo foto com OCR... mantenha a página aberta.';
-    const result=await Tesseract.recognize(f,'por+eng',{logger:m=>{if(m.status)status.textContent='OCR: '+m.status+(m.progress?` ${Math.round(m.progress*100)}%`:'')}});
-    const text=result.data.text||'';
+    if(btn) btn.disabled=true;
+    setStatus('Preparando imagem...');
+    if(!window.Tesseract) throw new Error('A biblioteca OCR não carregou. Atualize a página com Ctrl+F5 ou preencha manualmente.');
+    const processed=await preprocessImageFile(f);
+    setStatus('Lendo foto com OCR... mantenha a página aberta. Pode levar até 1 minuto na primeira vez.');
+    const result=await Tesseract.recognize(processed,'por+eng',{logger:m=>{if(m.status)setStatus('OCR: '+m.status+(m.progress?` ${Math.round(m.progress*100)}%`:''));}});
+    const text=result?.data?.text||'';
     const ans=extractAnswersFromText(text);
     setGridAnswers(ans);
     const n=ans.filter(Boolean).length;
-    status.textContent=`Leitura concluída: ${n}/${state.questions.length} alternativas identificadas. Confira manualmente antes de salvar.`;
-  }catch(e){status.textContent='Não foi possível ler a foto: '+e.message;}
+    if(n===0){
+      setStatus('A foto foi lida, mas nenhuma alternativa foi identificada. Tente foto mais próxima, sem sombra, ou preencha manualmente.', 'status-error');
+    }else{
+      setStatus(`Leitura concluída: ${n}/${state.questions.length} alternativas identificadas. Confira manualmente antes de salvar.`, n>=20?'status-ok':'status-work');
+    }
+    console.log('Texto OCR:', text);
+  }catch(e){
+    setStatus('Não foi possível ler a foto: '+(e.message||e), 'status-error');
+    console.error(e);
+  }finally{
+    if(btn) btn.disabled=false;
+  }
 }
 function recomputeStudentsFromRaw(){
   if(!state.students) return;
@@ -490,6 +540,33 @@ function exportPhotoModel(){
     download('dados_avaliacao_ete.csv',rows.map(r=>r.join(';')).join('\n'));
   }
 }
+function buildExportRows(){
+  ensurePhotoDefaults();
+  const rows=[];
+  rows.push(['Aluno',...state.questions]);
+  rows.push(['Descritores',...state.questions.map(q=>state.map?.[q]||'')]);
+  rows.push(['Gabarito',...state.questions.map(q=>state.answerKey?.[q]||'')]);
+  (state.students||[]).forEach(s=>rows.push([s.name,...(s.raw&&s.raw.length?s.raw:state.questions.map((q,i)=>s.answers?.[i]?'1':'0'))]));
+  return rows;
+}
+function exportPhotoPdf(){
+  const rows=buildExportRows();
+  const esc=x=>String(x??'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));
+  const table=rows.map((r,i)=>`<tr>${r.map(c=>i===0?`<th>${esc(c)}</th>`:`<td>${esc(c)}</td>`).join('')}</tr>`).join('');
+  const html=`<!doctype html><html><head><meta charset="utf-8"><title>Dados da avaliação</title><style>body{font-family:Arial,sans-serif;margin:24px;color:#111}h1{font-size:20px;margin:0 0 6px}p{margin:4px 0 12px}table{border-collapse:collapse;width:100%;font-size:10px}th,td{border:1px solid #999;padding:4px;text-align:center}th:first-child,td:first-child{text-align:left;font-weight:bold;white-space:nowrap;background:#f2f4f8}@media print{body{margin:10mm}button{display:none}}</style></head><body><button onclick="window.print()">Imprimir / salvar em PDF</button><h1>ETE Professor José Luiz de Mendonça</h1><p>Sistema Inteligente de Diagnóstico Educacional • Criado por Felipe Camargo • Versão ${APP_VERSION}</p><p>Disciplina: ${esc(currentDiscipline())} • Gerado em ${new Date().toLocaleString('pt-BR')}</p><table>${table}</table><script>setTimeout(()=>window.print(),300)<\/script></body></html>`;
+  const w=window.open('','_blank');
+  if(!w){alert('O navegador bloqueou a janela de PDF. Permita pop-ups para este site.');return;}
+  w.document.open(); w.document.write(html); w.document.close();
+}
+function saveManualKey(){
+  const t=$('#photoRecordType'); if(t) t.value='key';
+  savePhotoKey();
+}
+function saveManualStudent(){
+  const t=$('#photoRecordType'); if(t) t.value='student';
+  savePhotoKey();
+}
+
 function clearPhotoGrid(){
   ensurePhotoDefaults(); state.photoKey=Array(state.questions.length).fill(''); save(); renderPhotoKey(); const st=$('#photoKeyStatus'); if(st) st.textContent='Alternativas limpas. Preencha manualmente ou envie uma nova foto.';
 }
@@ -515,11 +592,16 @@ $('#importJson').onchange=e=>{let f=e.target.files[0]; if(!f)return; let r=new F
 $('#copyReport').onclick=()=>navigator.clipboard.writeText($('#reportOutput').value||'');$('#downloadReport').onclick=()=>download('relatorio-diagnostico.txt',$('#reportOutput').value||'');
 if($('#generateMap')) $('#generateMap').onclick=generateMapaMina;
 if($('#generateLocalQuestions')) $('#generateLocalQuestions').onclick=generateLocalQuestionsOnly;
+
+if($('#photoKeyInput')) $('#photoKeyInput').onchange=e=>{const f=e.target.files?.[0]; const wrap=$('#photoPreviewWrap'); const img=$('#photoPreview'); const st=$('#photoKeyStatus'); if(f&&wrap&&img){img.src=URL.createObjectURL(f); wrap.style.display='block'; if(st){st.className='hint status-work'; st.textContent='Foto carregada. Clique em Ler foto para iniciar o OCR.';}}};
 if($('#readPhotoKey')) $('#readPhotoKey').onclick=readPhotoKey;
 if($('#clearPhotoGrid')) $('#clearPhotoGrid').onclick=clearPhotoGrid;
 if($('#savePhotoKey')) $('#savePhotoKey').onclick=savePhotoKey;
+if($('#saveManualKey')) $('#saveManualKey').onclick=saveManualKey;
+if($('#saveManualStudent')) $('#saveManualStudent').onclick=saveManualStudent;
 if($('#applyPhotoKey')) $('#applyPhotoKey').onclick=applyPhotoKeyToPaste;
 if($('#exportPhotoModel')) $('#exportPhotoModel').onclick=exportPhotoModel;
+if($('#exportPhotoPdf')) $('#exportPhotoPdf').onclick=exportPhotoPdf;
 if($('#generateSheet')) $('#generateSheet').onclick=generateFicha;
 if($('#copySheet')) $('#copySheet').onclick=()=>navigator.clipboard.writeText($('#sheetOutput')?.value||'');
 if($('#downloadSheet')) $('#downloadSheet').onclick=()=>download('ficha-exercicios.txt',$('#sheetOutput')?.value||'');

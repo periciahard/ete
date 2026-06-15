@@ -2,7 +2,7 @@
 
 Criado por Felipe Camargo.
 
-## Versão 23.0
+## Versão 25.0
 
 Novidades:
 
@@ -36,3 +36,15 @@ Exemplo:
 ## Publicação no GitHub Pages
 
 Envie todos os arquivos do pacote para o repositório e ative o GitHub Pages em Settings > Pages.
+
+
+## Versão 25.0
+- Cabeçalho fixo ao rolar a página.
+- Leitura de foto aprimorada com prévia, status de OCR, pré-processamento de imagem e mensagens de erro claras.
+- Atualização do service worker para evitar cache antigo no GitHub Pages.
+
+
+## V25
+- Salvamento manual de gabarito oficial digitado.
+- Inclusão manual de aluno faltoso, com 26 respostas.
+- Exportação dos dados em Excel e PDF.

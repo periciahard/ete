@@ -125,15 +125,18 @@ Ana Silva	C	D	B"></textarea>
           </label>
         </div>
         <label><b>Foto da folha ou cartão-resposta</b></label>
-        <input type="file" id="photoKeyInput" accept="image/*" capture="environment">
+        <input type="file" id="photoKeyInput" accept="image/*,.jpg,.jpeg,.png,.webp">
+        <div id="photoPreviewWrap" class="photo-preview" style="display:none"><img id="photoPreview" alt="Prévia da foto enviada"></div>
         <div class="actions">
           <button id="readPhotoKey">Ler foto</button>
           <button id="clearPhotoGrid" class="secondary">Limpar alternativas</button>
-          <button id="savePhotoKey">Salvar registro conferido</button>
+          <button id="saveManualKey" class="highlightBtn">Salvar gabarito digitado</button>
+          <button id="saveManualStudent" class="highlightBtn">Salvar respostas do aluno</button>
           <button id="applyPhotoKey">Atualizar tabela de importação</button>
           <button id="exportPhotoModel">Exportar Excel</button>
+          <button id="exportPhotoPdf">Exportar PDF</button>
         </div>
-        <p id="photoKeyStatus" class="hint">Você pode preencher manualmente ou enviar uma foto. Formatos bons: “1 A, 2 C...” ou “Q1 A, Q2 C...”.</p>
+        <p id="photoKeyStatus" class="hint">Você pode preencher manualmente ou enviar uma foto. Para aluno faltoso, digite o nome, selecione as 26 alternativas e clique em “Salvar respostas do aluno”. Para gabarito oficial, use “Salvar gabarito digitado”.</p>
       </div>
       <div class="panel">
         <h3>Conferência manual das 26 questões</h3>
@@ -169,7 +172,7 @@ Ana Silva	C	D	B"></textarea>
 
     </section>
 
-    <footer>ETE Professor José Luiz de Mendonça • Sistema Inteligente de Diagnóstico Educacional • Criado por Felipe Camargo • Versão 23.0</footer>
+    <footer>ETE Professor José Luiz de Mendonça • Sistema Inteligente de Diagnóstico Educacional • Criado por Felipe Camargo • Versão 25.0</footer>
   </main>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
