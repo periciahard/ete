@@ -5,7 +5,70 @@ function save(){state.meta.updated=new Date().toLocaleString('pt-BR');localStora
 function load(){try{Object.assign(state,JSON.parse(localStorage.getItem(STORE)||'{}'))}catch(e){} if(state.meta?.updated)$('#lastSave').textContent='Último salvamento: '+state.meta.updated;}
 async function loadDescriptors(){try{let [p,m]=await Promise.all([fetch('descritores/portugues-em.json').then(r=>r.json()),fetch('descritores/matematica-em.json').then(r=>r.json())]);state.descriptors=[...p,...m];}catch(e){state.descriptors=[]} renderDescriptors();}
 function pct(n,d){return d?Math.round(n/d*100):0} function level(v){return v>=70?['Consolidado','ok','🟢']:v>=40?['Em desenvolvimento','warn','🟡']:['Crítico','bad','🔴']}
-function parseData(text){let lines=text.trim().split(/\r?\n/).filter(Boolean); if(!lines.length)return; let sep=lines[0].includes(';')?';':','; let head=lines[0].split(sep).map(x=>x.trim()); let qs=head.slice(1).map((h,i)=>h||`Q${i+1}`); let students=lines.slice(1,51).map(l=>{let cols=l.split(sep).map(x=>x.trim());return {name:cols[0]||'Aluno sem nome',answers:qs.map((q,i)=>String(cols[i+1]||'0').match(/1|s|sim|certo|acerto/i)?1:0)}}).filter(s=>s.name); state.questions=qs; state.students=students; qs.forEach(q=>state.map[q]=state.map[q]||''); save(); renderAll(); go('turma');}
+function normalizeCell(x){return String(x||'').trim().replace(/^"|"$/g,'')}
+function answerValue(x){x=normalizeCell(x).toLowerCase(); if(!x)return 0; if(/^(1|s|sim|c|certo|correto|acerto|a|✓|✔|ok)$/i.test(x))return 1; if(/^(0|n|não|nao|e|errado|erro|x|✗|✘)$/i.test(x))return 0; return /1|sim|certo|acerto|✓|✔/.test(x)?1:0}
+function splitSmart(line){
+  if(line.includes(';'))return line.split(';').map(normalizeCell);
+  if(line.includes('\t'))return line.split('\t').map(normalizeCell);
+  if(line.includes(','))return line.split(',').map(normalizeCell);
+  let parts=line.trim().split(/\s{2,}/).map(normalizeCell).filter(Boolean);
+  if(parts.length>2)return parts;
+  let tokens=line.trim().split(/\s+/).filter(Boolean);
+  let firstAns=tokens.findIndex(t=>/^(1|0|C|E|A|S|N|SIM|NAO|NÃO|CERTO|ERRADO|✓|✔|X)$/i.test(t));
+  if(firstAns>0)return [tokens.slice(0,firstAns).join(' '),...tokens.slice(firstAns)];
+  return [line.trim()];
+}
+function looksLikeHeader(cols){return cols.slice(1).some(c=>/^q\d+$/i.test(c)||/^quest/i.test(c))||/aluno|nome|estudante/i.test(cols[0]||'')}
+function parseData(text){
+  text=(text||'').replace(/\u00a0/g,' ').trim();
+  let lines=text.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+  if(!lines.length){alert('Cole ou extraia uma tabela antes de processar.');return;}
+  let rows=lines.map(splitSmart).filter(r=>r.length>1);
+  if(!rows.length){alert('Não consegui identificar uma tabela. Ajuste o texto para o modelo Aluno,Q1,Q2...');return;}
+  let header=looksLikeHeader(rows[0])?rows.shift():null;
+  let maxAnswers=Math.max(...rows.map(r=>r.length-1));
+  let qs=header?header.slice(1).map((h,i)=>/^q/i.test(h)?h:`Q${i+1}`):Array.from({length:maxAnswers},(_,i)=>`Q${i+1}`);
+  rows=rows.slice(0,50);
+  let students=rows.map(r=>({name:normalizeCell(r[0])||'Aluno sem nome',answers:qs.map((q,i)=>answerValue(r[i+1]))})).filter(s=>s.name&&!/^total|m[eé]dia|quest/i.test(s.name.toLowerCase()));
+  if(!students.length){alert('Não encontrei alunos válidos na tabela.');return;}
+  state.questions=qs; state.students=students; qs.forEach(q=>state.map[q]=state.map[q]||''); save(); renderAll(); go('turma');
+}
+async function extractPdfText(file){
+  if(!window.pdfjsLib)throw new Error('Biblioteca PDF.js não carregou. Verifique a internet ou use CSV/colar tabela.');
+  pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  const buf=await file.arrayBuffer(); const pdf=await pdfjsLib.getDocument({data:buf}).promise; let all=[];
+  for(let p=1;p<=pdf.numPages;p++){
+    const page=await pdf.getPage(p); const content=await page.getTextContent();
+    const items=content.items.map(it=>({str:it.str,x:it.transform[4],y:Math.round(it.transform[5])})).filter(it=>it.str.trim());
+    const lines={}; items.forEach(it=>{(lines[it.y]=lines[it.y]||[]).push(it)});
+    Object.keys(lines).sort((a,b)=>b-a).forEach(y=>{all.push(lines[y].sort((a,b)=>a.x-b.x).map(it=>it.str).join('  '))});
+  }
+  return all.join('\n');
+}
+async function extractImageText(file){
+  if(!window.Tesseract)throw new Error('Biblioteca OCR não carregou. Verifique a internet ou use CSV/colar tabela.');
+  const status=$('#extractStatus');
+  const result=await Tesseract.recognize(file,'por+eng',{logger:m=>{if(m.status)status.textContent='OCR: '+m.status+(m.progress?` ${Math.round(m.progress*100)}%`:'')}});
+  return result.data.text||'';
+}
+async function extractSelectedFile(){
+  const file=$('#fileInput').files[0]; const status=$('#extractStatus');
+  if(!file){alert('Escolha um PDF, imagem, CSV ou TXT primeiro.');return;}
+  try{
+    status.textContent='Lendo arquivo...'; let text='';
+    if(file.type==='application/pdf'||/\.pdf$/i.test(file.name)) text=await extractPdfText(file);
+    else if(file.type.startsWith('image/')) text=await extractImageText(file);
+    else text=await file.text();
+    $('#pasteData').value=cleanExtractedTable(text);
+    status.textContent='Leitura concluída. Confira a tabela extraída e clique em Processar dados.';
+  }catch(err){status.textContent='Não foi possível ler automaticamente: '+err.message;}
+}
+function cleanExtractedTable(text){
+  let lines=(text||'').replace(/\u00a0/g,' ').split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+  // Remove cabeçalhos comuns que atrapalham a tabela
+  lines=lines.filter(l=>!/^p[aá]gina|^resultado geral|^escola|^turma\b|^data\b/i.test(l));
+  return lines.join('\n');
+}
 function calcStudent(s){let total=s.answers.length, ac=s.answers.reduce((a,b)=>a+b,0), p=pct(ac,total);let crit=[];s.answers.forEach((v,i)=>{if(!v&&state.map[state.questions[i]])crit.push(state.map[state.questions[i]])});return {total,ac,p,crit:[...new Set(crit)]}}
 function descriptorStats(){let out={};state.questions.forEach((q,i)=>{let d=state.map[q]||'Sem descritor'; if(!out[d])out[d]={d,total:0,ac:0,qs:[]}; out[d].total+=state.students.length; out[d].ac+=state.students.reduce((a,s)=>a+(s.answers[i]||0),0); out[d].qs.push(q)}); return Object.values(out).map(x=>({...x,p:pct(x.ac,x.total)})).sort((a,b)=>a.p-b.p)}
 function renderSummary(){let n=state.students.length, q=state.questions.length;let acc=state.students.reduce((a,s)=>a+calcStudent(s).ac,0), total=n*q, p=pct(acc,total);let prior=state.students.filter(s=>calcStudent(s).p<40).length;let crit=descriptorStats().filter(d=>d.p<40&&d.d!='Sem descritor').length;$('#summaryCards').innerHTML=[['👨‍🎓','Alunos avaliados',n],['📋','Questões',q],['📊','Média geral',p+'%'],['🔴','Alunos prioritários',prior],['🧩','Descritores críticos',crit]].map(c=>`<div class="card"><span>${c[0]} ${c[1]}</span><b>${c[2]}</b></div>`).join('')}
@@ -23,7 +86,8 @@ function renderAll(){renderSummary();renderMap();renderStudents();renderClass();
 function go(id){$$('.view').forEach(v=>v.classList.toggle('active',v.id==id));$$('.nav').forEach(b=>b.classList.toggle('active',b.dataset.view==id));renderAll();}
 document.addEventListener('click',e=>{let goid=e.target.dataset.go||e.target.dataset.view;if(goid)go(goid); if(e.target.dataset.report)$('#reportOutput').value=makeReport(e.target.dataset.report)});
 $('#processData').onclick=()=>parseData($('#pasteData').value);$('#loadExample').onclick=()=>{$('#pasteData').value='Aluno,Q1,Q2,Q3,Q4,Q5,Q6,Q7,Q8\nAna,1,1,0,1,0,1,1,0\nBruno,0,1,0,0,0,1,0,0\nCarla,1,1,1,1,1,0,1,1\nDiego,0,0,1,0,1,0,0,1';parseData($('#pasteData').value)};
-$('#fileInput').onchange=e=>{let f=e.target.files[0]; if(!f)return; let r=new FileReader(); r.onload=()=>{$('#pasteData').value=r.result; if(/csv|text/.test(f.type)||f.name.match(/\.csv|\.txt$/i))parseData(r.result)}; r.readAsText(f)};
+$('#fileInput').onchange=async e=>{let f=e.target.files[0]; if(!f)return; $('#extractStatus').textContent='Arquivo selecionado: '+f.name+'. Clique em Ler PDF/imagem ou Processar se for CSV/TXT.'; if(/csv|text/.test(f.type)||f.name.match(/\.csv|\.txt$/i)){let t=await f.text();$('#pasteData').value=t;}};
+$('#extractFile').onclick=extractSelectedFile;
 $('#studentSearch').oninput=renderStudents; $('#descriptorSearch').oninput=renderDescriptors; $('#descriptorDiscipline').onchange=renderDescriptors;
 $('#saveSnapshot').onclick=()=>{let avg=pct(state.students.reduce((a,s)=>a+calcStudent(s).ac,0),state.students.length*state.questions.length);state.history.push({date:new Date().toLocaleString('pt-BR'),avg,students:state.students.length});save();renderHistory()};
 $('#clearSnapshots').onclick=()=>{if(confirm('Limpar histórico?')){state.history=[];save();renderHistory()}};

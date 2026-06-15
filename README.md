@@ -51,3 +51,8 @@ A biblioteca de descritores é editável nos arquivos:
 - `descritores/matematica-em.json`
 
 Recomenda-se conferir e ajustar conforme a matriz vigente adotada pela rede, pelo SAEPE/CAEd e pelo SAEB/INEP.
+
+
+## Melhorias de leitura de PDF/imagem
+
+Esta versão inclui leitura automática de PDF com PDF.js e OCR de imagens/PDF escaneado com Tesseract.js no navegador. Após extrair, o professor deve conferir a tabela antes de processar. Para máxima confiabilidade, recomenda-se usar CSV ou colar a tabela no formato `Aluno,Q1,Q2,Q3...`.
