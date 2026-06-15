@@ -28,3 +28,6 @@ html{scroll-behavior:smooth}.topbar{display:none}.closeMenu{display:none}.sideba
 .aiBtn{background:linear-gradient(135deg,var(--green),var(--blue2));box-shadow:0 8px 22px rgba(0,155,97,.22)}
 #mapa details{margin-top:12px;background:#fbfdff;border-left:5px solid var(--green)}
 #mapa details label{display:block;margin:10px 0}.reportbox{white-space:pre-wrap}
+.hero-left{display:flex;align-items:center;gap:18px}.credit{font-weight:800;opacity:.95;margin:.25rem 0 0}.mobile-menu{display:none;position:fixed;z-index:40;top:10px;left:10px;background:var(--yellow);color:var(--blue);box-shadow:var(--shadow)}.close-menu{display:none}.highlightBtn,.nav.highlight{background:linear-gradient(135deg,var(--green),var(--blue2));}.accent-panel{border-left:6px solid var(--yellow)}
+@media(max-width:900px){.mobile-menu{display:block}.main{padding-top:60px}.close-menu{display:block}.hero-left{align-items:flex-start}.hero-logo{width:76px;height:76px}.sidebar{left:-310px;position:fixed;}.sidebar.open{left:0}.brand{padding-right:0}.ghost.close-menu{display:block;background:rgba(255,255,255,.16);color:white;text-align:center}}
+@media(max-width:560px){.hero-left{flex-direction:column}.hero-logo{width:92px;height:92px}}

@@ -1,65 +1,64 @@
-# Sistema Inteligente de Diagnóstico Educacional — ETE Professor José Luiz de Mendonça
+# ETE Professor José Luiz de Mendonça — Diagnóstico Pedagógico Inteligente
 
-Criado por **Felipe Camargo**.
+Sistema criado por **Felipe Camargo** para análise de resultados por questão, descritores SAEB/SAEPE, relatórios pedagógicos e Mapa da Mina individualizado.
 
-Versão **19.0**.
+## Versão
+20.0
 
-## O que esta versão faz
+## Modelo de Excel recomendado
 
-- Importa Excel no modelo da escola:
-  - linha 1: número das questões;
-  - linha 2: descritores;
-  - linha 3: gabarito;
-  - demais linhas: respostas dos alunos.
-- Permite selecionar a disciplina: **Língua Portuguesa** ou **Matemática**.
-- Filtra descritores, relatórios e intervenções pela disciplina escolhida.
-- Gera diagnóstico da turma, análise individual, relatórios e Mapa da Mina.
-- Gera Mapa da Mina individualizado por aluno.
-- Gera **10 questões individualizadas por aluno**, com base nos descritores prioritários.
-- Funciona em GitHub Pages como site estático/PWA.
-- Inclui opção de IA por:
-  1. chave informada no navegador, para testes rápidos;
-  2. backend/proxy, recomendado para uso institucional.
+A planilha deve seguir este modelo:
 
-## Publicação no GitHub Pages
+| Aluno | Q1 | Q2 | Q3 |
+|---|---|---|---|
+| Descritores | D16 | D4 | D4 |
+| Gabarito | C | C | C |
+| Ana Silva | C | D | B |
+| Bruno Souza | E | B | E |
 
-Envie todos os arquivos para o repositório e ative:
+O sistema identifica automaticamente:
 
-`Settings > Pages > Deploy from branch > main > /root`
+1. primeira linha: questões;
+2. segunda linha: descritores;
+3. terceira linha: gabarito;
+4. demais linhas: respostas dos alunos.
 
-## IA no GitHub Pages
+## IA no Mapa da Mina
 
-O GitHub Pages é estático. Por isso, não consegue proteger uma chave de API se ela estiver escrita no código do site.
+No GitHub Pages o site é estático. Portanto, a IA só funciona se uma das opções abaixo for configurada:
 
-Para testes rápidos, o professor pode informar a chave no navegador, no campo de configuração de IA. Essa chave fica salva apenas no armazenamento local do navegador usado.
+### Opção recomendada: backend/proxy na Vercel
 
-Para uso institucional, recomenda-se usar o backend/proxy incluído na pasta `api/`.
-
-## Backend/proxy de IA recomendado
-
-A pasta `api/openai.js` foi preparada para Vercel.
-
-Passos resumidos:
-
-1. Crie uma conta na Vercel.
-2. Importe este repositório.
-3. Configure a variável de ambiente:
+1. Publique este projeto também na Vercel.
+2. No painel da Vercel, configure a variável de ambiente:
 
 ```text
-OPENAI_API_KEY=sua_chave_aqui
+OPENAI_API_KEY=sua_chave
 ```
 
-4. Publique o projeto.
-5. Copie a URL do endpoint, por exemplo:
+3. No site, em **Configurações > Configurar IA**, informe a URL:
 
 ```text
 https://seu-projeto.vercel.app/api/openai
 ```
 
-6. Cole essa URL no campo **URL do backend/proxy de IA** dentro do site.
+### Opção de teste: chave direta no navegador
 
-Assim, a chave fica protegida no servidor e não aparece no código público do GitHub Pages.
+É possível informar a chave diretamente no navegador, mas isso não é recomendado para uso institucional, pois a chave pode ficar exposta no dispositivo do usuário.
 
-## Observação
+## Arquivos principais
 
-A geração de IA utiliza a **Responses API** da OpenAI. O endpoint local chama `https://api.openai.com/v1/responses`.
+- `index.html`: página principal.
+- `css/style.css`: visual do sistema.
+- `js/app.js`: lógica do diagnóstico.
+- `api/openai.js`: backend/proxy para Vercel.
+- `assets/logo-ete.png`: logo institucional.
+- `descritores/`: banco de descritores.
+
+## Publicação no GitHub Pages
+
+Envie todos os arquivos para o repositório e ative:
+
+```text
+Settings > Pages > Deploy from branch > main > root
+```

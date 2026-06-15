@@ -1,5 +1,5 @@
 const STORE='ete_diagnostico_v19';
-const APP_VERSION='19.0';
+const APP_VERSION='20.0';
 let state={students:[],questions:[],map:{},answerKey:{},descriptors:[],history:[],meta:{updated:null,modelo:'',disciplina:'Língua Portuguesa',aiKey:'',aiModel:'gpt-4.1-mini',aiBackendUrl:''}};
 const $=s=>document.querySelector(s); const $$=s=>[...document.querySelectorAll(s)];
 function save(){state.meta.updated=new Date().toLocaleString('pt-BR');localStorage.setItem(STORE,JSON.stringify(state));$('#lastSave').textContent='Último salvamento: '+state.meta.updated;}
@@ -374,6 +374,42 @@ function buildAiPrompt(s){
   const erros=descs.map(d=>`- ${d.codigo}: ${d.texto}. Intervenção base: ${d.intervencao||''}`).join('\n')||'Sem descritores críticos mapeados.';
   return `Você é um analista educacional especialista em SAEB, SAEPE, ENEM e intervenção pedagógica individualizada. Gere um MAPA DA MINA para um estudante da ETE Professor José Luiz de Mendonça.\n\nDisciplina: ${currentDiscipline()}\nAluno: ${s.name}\nDesempenho: ${c.ac}/${c.total} acertos (${c.p}%) - ${l[0]}\nDescritores com dificuldade:\n${erros}\n\nEntregue em português do Brasil, com linguagem objetiva para professor. Estrutura obrigatória:\n1. Diagnóstico individual breve.\n2. Cronograma de 4 semanas. Em cada semana: 1h de estudo + 1h de resolução de exercícios.\n3. Estratégia de acompanhamento do professor.\n4. Gere 10 questões inéditas, contextualizadas, de múltipla escolha, sorteadas/variadas entre os descritores de dificuldade, com gabarito ao final.\n5. Não cite que é IA. Não invente dados pessoais. Use apenas os descritores informados.`;
 }
+
+function buildAiQuestionsPrompt(s){
+  const c=calcStudent(s), l=level(c.p), descs=criticalDescriptorObjectsForStudent(s).slice(0,6);
+  const erros=descs.map(d=>`- ${d.codigo}: ${d.texto}. Explicação: ${d.explicacao||''}. Intervenção: ${d.intervencao||''}`).join('\n')||'Sem descritores críticos mapeados.';
+  return `Você é um elaborador de questões e analista educacional especialista em SAEB, SAEPE, ENEM e recomposição de aprendizagens.
+
+Tarefa: gerar EXATAMENTE 10 questões inéditas e individualizadas para o aluno abaixo, usando apenas os descritores prioritários informados.
+
+Disciplina: ${currentDiscipline()}
+Aluno: ${s.name}
+Desempenho: ${c.ac}/${c.total} acertos (${c.p}%) - ${l[0]}
+Descritores prioritários:
+${erros}
+
+Regras obrigatórias:
+1. Distribua as 10 questões entre os descritores prioritários, dando mais questões aos descritores mais críticos.
+2. Use linguagem clara, contextualizada e adequada ao Ensino Médio.
+3. Cada questão deve ter 5 alternativas (A, B, C, D, E), com apenas uma correta.
+4. Indique o descritor antes de cada questão.
+5. Ao final, apresente o gabarito e uma justificativa curta de cada resposta.
+6. Não use dados pessoais além do nome do aluno.
+7. Não cite que foi produzido por IA.
+
+Formato:
+QUESTÃO 1 — [D...]
+Enunciado...
+A) ...
+B) ...
+C) ...
+D) ...
+E) ...
+
+GABARITO COMENTADO
+1. Letra ... — justificativa...`;
+}
+
 function extractResponseText(data){
   return data.output_text || (data.output||[]).flatMap(o=>o.content||[]).map(c=>c.text||c?.text?.value||'').join('\n') || data.text || data.content || 'A IA respondeu, mas o texto não pôde ser lido.';
 }
@@ -387,7 +423,7 @@ async function callOpenAI(prompt, maxTokens=4200){
     return data.text || extractResponseText(data);
   }
   const key=(state.meta?.aiKey||'').trim();
-  if(!key) throw new Error('Configure a URL do backend/proxy de IA ou uma chave OpenAI para testes no navegador.');
+  if(!key) throw new Error('IA não configurada. No GitHub Pages, configure primeiro a URL do backend/proxy em Configurações. A pasta api/openai.js só funciona quando o projeto também é publicado na Vercel ou ambiente semelhante.');
   const res=await fetch('https://api.openai.com/v1/responses',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model,input:prompt,temperature:0.7,max_output_tokens:maxTokens})});
   if(!res.ok){let t=await res.text(); throw new Error('Falha na IA: '+res.status+' '+t.slice(0,220));}
   const data=await res.json();
