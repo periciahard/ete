@@ -1,44 +1,34 @@
-# ETE Professor José Luiz de Mendonça — Diagnóstico Pedagógico V43
+# ETE Professor José Luiz de Mendonça — Diagnóstico Educacional V44
 
-Sistema Inteligente de Diagnóstico Educacional criado por Felipe Camargo.
+Versão 44.0 do Sistema Inteligente de Diagnóstico Educacional.
 
-## Objetivo principal
+## Melhorias da V44
 
-Importar resultados de avaliações, analisar desempenho por aluno e por descritor, gerar relatórios pedagógicos, Mapa da Mina, fichas de exercícios e leitura gestora para coordenação.
+- Aba **Alunos** ampliada com análise individual detalhada.
+- Gráficos por aluno: acertos x erros, desempenho por descritor e faixa de desempenho.
+- Leitura pedagógica individual: Elementar I, Elementar II, Básico e Desejável.
+- Ações sugeridas ao professor com base nos descritores efetivamente errados por aluno.
+- Descritores revisados conforme as matrizes SAEB da **3ª série do Ensino Médio** para Língua Portuguesa e Matemática.
+- Validação passa a alertar quando o descritor importado não pertence à matriz da disciplina selecionada.
+- Mantidos: modo local, Supabase opcional, importação Excel/PDF/manual, relatórios, coordenação, TRI pedagógica, banco de questões e Mapa da Mina individualizado.
 
-## Novidades V43
+## Modelo recomendado de planilha
 
-- Aba de Diagnóstico com elementos gráficos: distribuição por nível, barras por nível, descritores críticos e questões críticas.
-- Gráfico de pizza em CSS para os níveis Elementar I, Elementar II, Básico e Desejável.
-- Gráficos de barras sem dependências externas, mantendo o site leve e compatível com GitHub Pages.
-- Nova seção “Análise pedagógica e sugestões ao professor”.
-- Sugestões mais objetivas para recomposição, reagrupamento por descritor, correção estratégica e acompanhamento.
-- Mapa da Mina permanece individualizado e sem IA paga.
-- Leitura por foto/OCR continua removida; o caminho principal é Excel/PDF/manual.
+1ª linha: questões  
+2ª linha: descritores  
+3ª linha: gabarito  
+Demais linhas: respostas dos alunos
 
-## Formato recomendado do Excel
+Exemplo:
 
-1. Primeira linha: número das questões, Q1 a Q26.
-2. Segunda linha: descritores de cada questão.
-3. Terceira linha: gabarito.
-4. Demais linhas: respostas dos alunos.
+| Aluno | Q1 | Q2 | Q3 |
+|---|---|---|---|
+| Descritores | D1 | D4 | D16 |
+| Gabarito | A | C | D |
+| Ana Silva | A | B | D |
 
-## Supabase
+## Observação importante
 
-Use apenas:
+A classificação por nível é pedagógica e estimada a partir do percentual de acertos da avaliação interna. Ela não substitui a escala oficial nem a TRI oficial do SAEPE/SAEB.
 
-- Project URL
-- Anon public key
-
-Nunca coloque chave secreta/service role no GitHub Pages.
-
-Antes de usar o modo institucional, execute o script `supabase_ete_diagnostico_schema.sql` no SQL Editor do Supabase e cadastre os usuários em Authentication. Depois cadastre os perfis e vínculos professor–turma–disciplina nas tabelas correspondentes.
-
-## Uso recomendado
-
-1. Importar avaliação.
-2. Conferir validação.
-3. Analisar diagnóstico.
-4. Gerar relatórios.
-5. Gerar recuperação/ficha.
-6. Salvar backup local ou sincronizar na nuvem.
+Criado por Felipe Camargo.

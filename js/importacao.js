@@ -9,7 +9,10 @@
   const key=third.slice(start,start+questions.length).map(v=>A().letter(v));
   const students=rows.slice(3).map(r=>({name:A().norm(r[0]),answers:r.slice(start,start+questions.length).map(v=>A().letter(v))})).filter(s=>s.name);
   const issues=[]; if(!questions.length)issues.push('Nenhuma questão encontrada.'); if(descriptors.some(x=>!x))issues.push('Há questões sem descritor.'); if(key.some(x=>!x))issues.push('Há itens sem gabarito A-E.'); students.forEach(s=>{if(s.answers.length<questions.length)issues.push('Aluno '+s.name+' possui respostas incompletas.')});
-  return {questions,descriptors,key,students,issues};
+  const disc=A().$('#assessmentDiscipline')?.value||A().state?.assessment?.discipline||A().state?.settings?.discipline||'Língua Portuguesa';
+  const validCodes=window.Descritores?.validCodes?.(disc);
+  if(validCodes){const invalid=[...new Set(descriptors.filter(d=>d&&!validCodes.has(d)))]; if(invalid.length)issues.push('Descritores fora da matriz da 3ª série do Ensino Médio em '+disc+': '+invalid.join(', '));}
+  return {questions,descriptors,key,students,issues,discipline:disc};
  }
  function renderValidation(data){const box=A().$('#validationResult'); const ok=!data.issues.length; const html=`<b>${ok?'Estrutura válida — análise liberada':'Conferência necessária — análise bloqueada'}</b><div class="checkgrid"><div><b>${data.questions.length}</b><br>questões</div><div><b>${data.descriptors.filter(Boolean).length}</b><br>descritores</div><div><b>${data.key.filter(Boolean).length}</b><br>gabaritos</div><div><b>${data.students.length}</b><br>alunos</div></div>${data.issues.length?'<ul>'+data.issues.map(i=>`<li>${A().safe(i)}</li>`).join('')+'</ul>':'<p>Todos os campos essenciais foram identificados. Clique em Confirmar e analisar.</p>'}`;
   if(box){box.className='statusbox '+(ok?'status-ok':'status-error'); box.innerHTML=html;}
