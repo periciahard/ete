@@ -3,11 +3,31 @@
  function rowsToAssessment(rows){
   rows=(rows||[]).filter(r=>r&&r.some(c=>A().norm(c))); if(rows.length<3) throw new Error('A planilha precisa ter pelo menos 3 linhas: questões, descritores e gabarito.');
   const first=rows[0], second=rows[1], third=rows[2];
-  const start=(A().norm(first[0]).toLowerCase().includes('aluno')||A().norm(first[0])==='')?1:0;
-  const questions=first.slice(start).map((v,i)=>A().norm(v)||'Q'+(i+1));
+  const firstCell=A().norm(first[0]).toLowerCase();
+  const secondCell=A().norm(second[0]).toLowerCase();
+  const thirdCell=A().norm(third[0]).toLowerCase();
+  // Aceita dois modelos:
+  // A) Q1 | Q2 | Q3...
+  //    D1 | D2 | D3...
+  //    A  | B  | C...
+  // B) Nome | Q1 | Q2 | Q3...
+  //    Descritores | D1 | D2 | D3...
+  //    Gabarito | A | B | C...
+  // No modelo B, a primeira coluna é ignorada na validação e usada como nome dos alunos.
+  const labelWords=['aluno','alunos','nome','nomes','estudante','estudantes','discente','discentes'];
+  const rowLabelWords=['descritor','descritores','gabarito','resposta','respostas'];
+  const hasLabelColumn=labelWords.some(w=>firstCell.includes(w)) || rowLabelWords.some(w=>secondCell.includes(w)||thirdCell.includes(w)) || firstCell==='';
+  const start=hasLabelColumn?1:0;
+  const rawQuestions=first.slice(start).map((v,i)=>A().norm(v)||'Q'+(i+1));
+  // Mantém apenas colunas que parecem questões ou que têm descritor/gabarito nas linhas seguintes.
+  const questions=rawQuestions.map((q,i)=>q || 'Q'+(i+1));
   const descriptors=second.slice(start,start+questions.length).map(v=>A().desc(v)||A().norm(v));
   const key=third.slice(start,start+questions.length).map(v=>A().letter(v));
-  const students=rows.slice(3).map(r=>({name:A().norm(r[0]),answers:r.slice(start,start+questions.length).map(v=>A().letter(v))})).filter(s=>s.name);
+  const students=rows.slice(3).map((r,idx)=>{
+    const name=hasLabelColumn ? A().norm(r[0]) : (A().norm(r[0]) && !A().letter(r[0]) ? A().norm(r[0]) : 'Aluno '+(idx+1));
+    const answerStart=hasLabelColumn ? start : (name.startsWith('Aluno ') ? 0 : 1);
+    return {name,answers:r.slice(answerStart,answerStart+questions.length).map(v=>A().letter(v))};
+  }).filter(s=>s.name && s.answers.some(Boolean));
   const issues=[]; if(!questions.length)issues.push('Nenhuma questão encontrada.'); if(descriptors.some(x=>!x))issues.push('Há questões sem descritor.'); if(key.some(x=>!x))issues.push('Há itens sem gabarito A-E.'); students.forEach(s=>{if(s.answers.length<questions.length)issues.push('Aluno '+s.name+' possui respostas incompletas.')});
   const disc=A().$('#assessmentDiscipline')?.value||A().state?.assessment?.discipline||A().state?.settings?.discipline||'Língua Portuguesa';
   const validCodes=window.Descritores?.validCodes?.(disc);

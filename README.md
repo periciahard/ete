@@ -1,8 +1,8 @@
-# ETE Professor José Luiz de Mendonça — Diagnóstico Educacional V44
+# ETE Professor José Luiz de Mendonça — Diagnóstico Educacional V45
 
-Versão 44.0 do Sistema Inteligente de Diagnóstico Educacional.
+Versão 45.0 do Sistema Inteligente de Diagnóstico Educacional.
 
-## Melhorias da V44
+## Melhorias da V45
 
 - Aba **Alunos** ampliada com análise individual detalhada.
 - Gráficos por aluno: acertos x erros, desempenho por descritor e faixa de desempenho.
