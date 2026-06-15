@@ -53,31 +53,21 @@ A biblioteca de descritores é editável nos arquivos:
 Recomenda-se conferir e ajustar conforme a matriz vigente adotada pela rede, pelo SAEPE/CAEd e pelo SAEB/INEP.
 
 
-## Melhorias de leitura de PDF/imagem
+## Modelo de Excel aceito na V13
 
-Esta versão inclui leitura automática de PDF com PDF.js e OCR de imagens/PDF escaneado com Tesseract.js no navegador. Após extrair, o professor deve conferir a tabela antes de processar. Para máxima confiabilidade, recomenda-se usar CSV ou colar a tabela no formato `Aluno,Q1,Q2,Q3...`.
+O sistema agora reconhece automaticamente o modelo usado pela ETE:
 
+| Nome | Q1 | Q2 | Q3 | ... | Q26 |
+|---|---|---|---|---|---|
+| Descritores | D16 | D4 | D10 | ... | D7 |
+| Gabarito | C | A | E | ... | B |
+| Nome do aluno | C | B | E | ... | A |
 
-## Versão 12 — Leitura de Excel
+A leitura considera:
 
-Esta versão adiciona leitura direta de arquivos `.xlsx` e `.xls` usando SheetJS no navegador.
+1. primeira linha = número das questões;
+2. segunda linha = descritor vinculado a cada questão;
+3. terceira linha = gabarito oficial;
+4. demais linhas = respostas dos alunos.
 
-Modelos aceitos:
-
-1. **Tabela simples de acertos**
-
-```csv
-Aluno,Q1,Q2,Q3
-Maria,1,0,1
-João,0,1,1
-```
-
-2. **Tabela com gabarito por descritor**
-
-Primeira coluna: `Aluno`; colunas seguintes: `Q1`, `Q2`, `Q3`...
-Linha `gabarito`: descritores corretos de cada questão, como `D15`, `D14`, `D10`...
-Linhas dos alunos: resposta/descrititor marcado em cada questão.
-
-O sistema compara automaticamente a resposta do aluno com o gabarito e transforma em acerto/erro.
-
-Observação: para leitura de `.xlsx` no GitHub Pages, a biblioteca SheetJS é carregada por CDN. Se a internet estiver bloqueada na primeira abertura, salve a planilha como `.csv` e importe normalmente.
+O sistema compara cada resposta do aluno com o gabarito e usa os descritores da segunda linha para gerar diagnóstico da turma, feedback individual e plano de intervenção.

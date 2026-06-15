@@ -1,5 +1,5 @@
-const STORE='ete_diagnostico_v9';
-let state={students:[],questions:[],map:{},descriptors:[],history:[],meta:{updated:null}};
+const STORE='ete_diagnostico_v13';
+let state={students:[],questions:[],map:{},answerKey:{},descriptors:[],history:[],meta:{updated:null,modelo:''}};
 const $=s=>document.querySelector(s); const $$=s=>[...document.querySelectorAll(s)];
 function save(){state.meta.updated=new Date().toLocaleString('pt-BR');localStorage.setItem(STORE,JSON.stringify(state));$('#lastSave').textContent='Último salvamento: '+state.meta.updated;}
 function load(){try{Object.assign(state,JSON.parse(localStorage.getItem(STORE)||'{}'))}catch(e){} if(state.meta?.updated)$('#lastSave').textContent='Último salvamento: '+state.meta.updated;}
@@ -7,6 +7,11 @@ async function loadDescriptors(){try{let [p,m]=await Promise.all([fetch('descrit
 function pct(n,d){return d?Math.round(n/d*100):0} function level(v){return v>=70?['Consolidado','ok','🟢']:v>=40?['Em desenvolvimento','warn','🟡']:['Crítico','bad','🔴']}
 function normalizeCell(x){return String(x||'').trim().replace(/^"|"$/g,'')}
 function answerValue(x){x=normalizeCell(x).toLowerCase(); if(!x)return 0; if(/^(1|s|sim|c|certo|correto|acerto|a|✓|✔|ok)$/i.test(x))return 1; if(/^(0|n|não|nao|e|errado|erro|x|✗|✘)$/i.test(x))return 0; return /1|sim|certo|acerto|✓|✔/.test(x)?1:0}
+
+function normAlt(x){return normalizeCell(x).toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Z0-9]/g,'');}
+function isQuestionLabel(x){return /^Q\s*\d+$/i.test(normalizeCell(x));}
+function isDescriptorCode(x){return /^D\s*\d{1,2}$/i.test(normalizeCell(x));}
+function cleanDescriptor(x){let v=normalizeCell(x).toUpperCase().replace(/\s+/g,''); return /^D\d{1,2}$/.test(v)?v:'';}
 
 function normalizePdfTokens(text){
   return (text||'')
@@ -72,10 +77,52 @@ function aoaToText(rows){
 function parseExcelRows(rows){
   rows=(rows||[]).map(r=>(r||[]).map(c=>normalizeCell(c))).filter(r=>r.some(c=>c));
   if(!rows.length) throw new Error('A planilha está vazia.');
-  // Remove linhas completamente vazias nas extremidades e limita colunas úteis.
+
+  // MODELO PADRÃO DA ETE:
+  // Linha 1: Nome | Q1 | Q2 | Q3...
+  // Linha 2: Descritores | D16 | D4 | D4...
+  // Linha 3: Gabarito | C | C | C...
+  // Linha 4 em diante: nome do aluno | alternativa marcada em cada questão.
+  const qRowIndex=rows.findIndex(r=>r.slice(1).filter(isQuestionLabel).length>=2);
+  if(qRowIndex>=0 && rows[qRowIndex+1] && rows[qRowIndex+2]){
+    const qRow=rows[qRowIndex];
+    const descRow=rows[qRowIndex+1];
+    const keyRow=rows[qRowIndex+2];
+    const descLabel=normalizeCell(descRow[0]).toLowerCase();
+    const keyLabel=normalizeCell(keyRow[0]).toLowerCase();
+    const qCols=[];
+    qRow.forEach((c,i)=>{ if(i>0 && isQuestionLabel(c)) qCols.push(i); });
+    const hasDescritores=/descritor/.test(descLabel) || qCols.some(i=>isDescriptorCode(descRow[i]));
+    const hasGabarito=/gabarito/.test(keyLabel) || qCols.some(i=>/^[A-E]$/i.test(normAlt(keyRow[i])));
+    if(qCols.length && hasDescritores && hasGabarito){
+      const qs=qCols.map(i=>qRow[i].replace(/\s+/g,'').toUpperCase());
+      const descriptors=qCols.map(i=>cleanDescriptor(descRow[i]));
+      const key=qCols.map(i=>normAlt(keyRow[i]));
+      const students=[];
+      rows.slice(qRowIndex+3).forEach(r=>{
+        const name=normalizeCell(r[0]);
+        if(!name || /^total|m[eé]dia|quest|descritor|gabarito/i.test(name)) return;
+        const raw=qCols.map(i=>normAlt(r[i]));
+        const answers=raw.map((v,i)=> key[i] && v===key[i] ? 1 : 0);
+        students.push({name,answers,raw});
+      });
+      if(students.length){
+        state.questions=qs;
+        state.students=students.slice(0,50);
+        state.map={}; state.answerKey={};
+        qs.forEach((q,i)=>{state.map[q]=descriptors[i]||''; state.answerKey[q]=key[i]||'';});
+        state.meta.modelo='Linha 1: questões; linha 2: descritores; linha 3: gabarito; demais linhas: respostas dos alunos.';
+        save(); renderAll(); go('turma');
+        const st=$('#extractStatus');
+        if(st) st.textContent=`Planilha processada no modelo ETE: ${students.length} alunos, ${qs.length} questões, descritores e gabarito identificados automaticamente.`;
+        return true;
+      }
+    }
+  }
+
+  // Modelo antigo: primeira coluna Aluno, linha gabarito com descritores e alunos respondendo D1/D2...
   const headerIndex=rows.findIndex(r=>r.some(c=>/^aluno$/i.test(c)) && r.some(c=>/^Q\s*\d+/i.test(c)));
   const gabaritoIndex=rows.findIndex(r=>r.some(c=>/^gabarito$/i.test(c)));
-  // Modelo 1: primeira coluna Aluno, linha gabarito com descritores e alunos respondendo D1/D2...
   if(headerIndex>=0 && gabaritoIndex>=0){
     const header=rows[headerIndex];
     const alunoCol=header.findIndex(c=>/^aluno$/i.test(c));
@@ -93,23 +140,24 @@ function parseExcelRows(rows){
         let answers=raw.map((v,i)=> /^D\d{1,2}$/.test(v) && key[i] ? (v===key[i]?1:0) : answerValue(v));
         students.push({name,answers,raw});
       });
-      if(students.length){ state.questions=qs; state.students=students.slice(0,50); qs.forEach((q,i)=>state.map[q]=key[i]||state.map[q]||''); save(); renderAll(); go('turma'); return true; }
+      if(students.length){ state.questions=qs; state.students=students.slice(0,50); state.map={}; state.answerKey={}; qs.forEach((q,i)=>{state.map[q]=key[i]||''; state.answerKey[q]='';}); save(); renderAll(); go('turma'); return true; }
     }
   }
-  // Modelo 2: primeira linha com Aluno,Q1,Q2... e valores 1/0/C/E.
+
+  // Modelo simples: primeira linha Aluno/Nome,Q1,Q2... e valores 1/0/C/E.
   const hi=headerIndex>=0?headerIndex:0;
   const header=rows[hi];
   const alunoCol=header.findIndex(c=>/^aluno|nome/i.test(c));
   if(alunoCol>=0){
     const qCols=[]; header.forEach((c,i)=>{ if(i!==alunoCol && (/^Q\s*\d+/i.test(c)||i>alunoCol)) qCols.push(i); });
-    const qs=qCols.map((i,k)=>/^Q\s*\d+/i.test(header[i])?header[i].replace(/\s+/g,''):`Q${k+1}`);
+    const qs=qCols.map((i,k)=>/^Q\s*\d+/i.test(header[i])?header[i].replace(/\s+/g,'').toUpperCase():`Q${k+1}`);
     const students=[];
     rows.slice(hi+1).forEach(r=>{
       let name=normalizeCell(r[alunoCol]);
-      if(!name || /^gabarito|total|m[eé]dia|quest/i.test(name.toLowerCase())) return;
-      students.push({name,answers:qCols.map(i=>answerValue(r[i]))});
+      if(!name || /^gabarito|descritor|total|m[eé]dia|quest/i.test(name.toLowerCase())) return;
+      students.push({name,answers:qCols.map(i=>answerValue(r[i])),raw:qCols.map(i=>normalizeCell(r[i]))});
     });
-    if(students.length){ state.questions=qs; state.students=students.slice(0,50); qs.forEach(q=>state.map[q]=state.map[q]||''); save(); renderAll(); go('turma'); return true; }
+    if(students.length){ state.questions=qs; state.students=students.slice(0,50); state.map={}; state.answerKey={}; qs.forEach(q=>{state.map[q]=state.map[q]||''; state.answerKey[q]='';}); save(); renderAll(); go('turma'); return true; }
   }
   return false;
 }
@@ -140,7 +188,8 @@ function parseData(text){
   let lines=text.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
   if(!lines.length){alert('Cole ou extraia uma tabela antes de processar.');return;}
   let rows=lines.map(splitSmart).filter(r=>r.length>1);
-  if(!rows.length){alert('Não consegui identificar uma tabela. Ajuste o texto para o modelo Aluno,Q1,Q2...');return;}
+  if(!rows.length){alert('Não consegui identificar uma tabela. Ajuste o texto para o modelo Nome,Q1,Q2...');return;}
+  if(parseExcelRows(rows)) return;
   let header=looksLikeHeader(rows[0])?rows.shift():null;
   let maxAnswers=Math.max(...rows.map(r=>r.length-1));
   let qs=header?header.slice(1).map((h,i)=>/^q/i.test(h)?h:`Q${i+1}`):Array.from({length:maxAnswers},(_,i)=>`Q${i+1}`);
@@ -195,7 +244,7 @@ function cleanExtractedTable(text){
 function calcStudent(s){let total=s.answers.length, ac=s.answers.reduce((a,b)=>a+b,0), p=pct(ac,total);let crit=[];s.answers.forEach((v,i)=>{if(!v&&state.map[state.questions[i]])crit.push(state.map[state.questions[i]])});return {total,ac,p,crit:[...new Set(crit)]}}
 function descriptorStats(){let out={};state.questions.forEach((q,i)=>{let d=state.map[q]||'Sem descritor'; if(!out[d])out[d]={d,total:0,ac:0,qs:[]}; out[d].total+=state.students.length; out[d].ac+=state.students.reduce((a,s)=>a+(s.answers[i]||0),0); out[d].qs.push(q)}); return Object.values(out).map(x=>({...x,p:pct(x.ac,x.total)})).sort((a,b)=>a.p-b.p)}
 function renderSummary(){let n=state.students.length, q=state.questions.length;let acc=state.students.reduce((a,s)=>a+calcStudent(s).ac,0), total=n*q, p=pct(acc,total);let prior=state.students.filter(s=>calcStudent(s).p<40).length;let crit=descriptorStats().filter(d=>d.p<40&&d.d!='Sem descritor').length;$('#summaryCards').innerHTML=[['👨‍🎓','Alunos avaliados',n],['📋','Questões',q],['📊','Média geral',p+'%'],['🔴','Alunos prioritários',prior],['🧩','Descritores críticos',crit]].map(c=>`<div class="card"><span>${c[0]} ${c[1]}</span><b>${c[2]}</b></div>`).join('')}
-function renderMap(){let el=$('#questionMap'); if(!el)return; el.innerHTML=state.questions.map(q=>`<label>${q}<select data-q="${q}"><option value="">Selecionar descritor</option>${state.descriptors.map(d=>`<option ${state.map[q]==d.codigo?'selected':''} value="${d.codigo}">${d.codigo} - ${d.disciplina}</option>`).join('')}</select></label>`).join(''); $$('[data-q]').forEach(x=>x.onchange=()=>{state.map[x.dataset.q]=x.value;save();renderAll()})}
+function renderMap(){let el=$('#questionMap'); if(!el)return; el.innerHTML=state.questions.map(q=>`<label>${q}${state.answerKey&&state.answerKey[q]?`<small>Gabarito: ${state.answerKey[q]}</small>`:''}<select data-q="${q}"><option value="">Selecionar descritor</option>${state.descriptors.map(d=>`<option ${state.map[q]==d.codigo?'selected':''} value="${d.codigo}">${d.codigo} - ${d.disciplina}</option>`).join('')}</select></label>`).join(''); $$('[data-q]').forEach(x=>x.onchange=()=>{state.map[x.dataset.q]=x.value;save();renderAll()})}
 function renderStudents(){let list=$('#studentList'); if(!list)return; let term=($('#studentSearch')?.value||'').toLowerCase(); list.innerHTML=state.students.filter(s=>s.name.toLowerCase().includes(term)).map((s,i)=>{let c=calcStudent(s), l=level(c.p);return `<button data-st="${i}">${l[2]} ${s.name}<br><small>${c.p}% • ${l[0]}</small></button>`}).join('')||'<p class="hint">Nenhum aluno importado.</p>'; $$('[data-st]').forEach(b=>b.onclick=()=>showStudent(+b.dataset.st));}
 function showStudent(i){let s=state.students[i], c=calcStudent(s), l=level(c.p);let desc=c.crit.map(code=>state.descriptors.find(d=>d.codigo==code)).filter(Boolean);$('#studentDetail').innerHTML=`<h3>${s.name}</h3><p><span class="badge ${l[1]}">${l[2]} ${l[0]}</span></p><div class="metricgrid"><div class="card"><span>Acertos</span><b>${c.ac}/${c.total}</b></div><div class="card"><span>Percentual</span><b>${c.p}%</b></div><div class="card"><span>Descritores críticos</span><b>${c.crit.length}</b></div></div><h4>Feedback individual</h4><div class="reportbox">${studentFeedback(s)}</div><h4>Descritores para intervenção</h4>${desc.map(d=>`<details open><summary>${d.codigo} — ${d.texto}</summary><p>${d.explicacao}</p><p><b>Intervenção:</b> ${d.intervencao}</p></details>`).join('')||'<p class="hint">Sem descritores críticos mapeados.</p>'}`}
 function studentFeedback(s){let c=calcStudent(s), l=level(c.p);let d=c.crit.slice(0,4).join(', ')||'sem descritor crítico mapeado';return `${s.name} apresentou desempenho ${l[0].toLowerCase()}, com ${c.ac} acertos em ${c.total} questões (${c.p}%). Os descritores que merecem maior atenção são: ${d}. Recomenda-se acompanhamento individualizado, retomada dos conteúdos associados aos erros e nova verificação após intervenção curta.`}
@@ -208,7 +257,7 @@ function makeReport(type){let avg=pct(state.students.reduce((a,s)=>a+calcStudent
 function renderAll(){renderSummary();renderMap();renderStudents();renderClass();renderDescriptors();renderTomorrow();renderHistory();}
 function go(id){$$('.view').forEach(v=>v.classList.toggle('active',v.id==id));$$('.nav').forEach(b=>b.classList.toggle('active',b.dataset.view==id));renderAll();}
 document.addEventListener('click',e=>{let goid=e.target.dataset.go||e.target.dataset.view;if(goid)go(goid); if(e.target.dataset.report)$('#reportOutput').value=makeReport(e.target.dataset.report)});
-$('#processData').onclick=()=>parseData($('#pasteData').value);$('#loadExample').onclick=()=>{$('#pasteData').value='Aluno,Q1,Q2,Q3,Q4,Q5,Q6,Q7,Q8\nAna,1,1,0,1,0,1,1,0\nBruno,0,1,0,0,0,1,0,0\nCarla,1,1,1,1,1,0,1,1\nDiego,0,0,1,0,1,0,0,1';parseData($('#pasteData').value)};
+$('#processData').onclick=()=>parseData($('#pasteData').value);$('#loadExample').onclick=()=>{$('#pasteData').value='Nome,Q1,Q2,Q3,Q4,Q5,Q6,Q7,Q8\nDescritores,D16,D4,D4,D16,D19,D15,D5,D10\nGabarito,C,C,C,C,C,D,A,B\nAna Silva,C,D,B,B,A,B,A,B\nBruno Souza,E,B,E,B,D,D,B,B\nCarla Lima,C,C,C,D,C,D,A,A\nDiego Costa,B,C,A,C,E,D,C,B';parseData($('#pasteData').value)};
 $('#fileInput').onchange=async e=>{let f=e.target.files[0]; if(!f)return; $('#extractStatus').textContent='Arquivo selecionado: '+f.name+'. Clique em Ler arquivo.'; if(/csv|text/.test(f.type)||f.name.match(/\.csv|\.txt$/i)){let t=await f.text();$('#pasteData').value=t;} if(f.name.match(/\.xlsx?$|\.xls$/i)){try{let book=await readExcelFile(f);$('#pasteData').value=aoaToText(book.rows);$('#extractStatus').textContent='Planilha lida: aba '+book.name+'. Confira os dados e clique em Processar, ou clique em Ler arquivo para processar automaticamente.';}catch(err){$('#extractStatus').textContent='Não consegui ler a planilha: '+err.message;}}};
 $('#extractFile').onclick=extractSelectedFile;
 $('#studentSearch').oninput=renderStudents; $('#descriptorSearch').oninput=renderDescriptors; $('#descriptorDiscipline').onchange=renderDescriptors;

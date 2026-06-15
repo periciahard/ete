@@ -7,9 +7,6 @@
   <title>ETE Professor José Luiz de Mendonça | Diagnóstico Pedagógico</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="css/style.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
   <aside class="sidebar" id="sidebar">
@@ -44,11 +41,26 @@
     </section>
 
     <section id="importar" class="view">
-      <h2>📤 Importar avaliação</h2><p class="hint">Cole uma tabela, envie Excel/CSV/TXT ou tente extrair de PDF/imagem. Modelo ideal: primeira linha com <b>Aluno,Q1,Q2,Q3...</b> ou uma planilha com a primeira coluna “Aluno” e linhas com 1 para acerto e 0 para erro. Até 50 alunos.</p>
-      <textarea id="pasteData" placeholder="Aluno,Q1,Q2,Q3,Q4\nMaria,1,0,1,1\nJoão,0,1,1,0"></textarea>
-      <div class="actions"><input type="file" id="fileInput" accept=".xlsx,.xls,.csv,.txt,.pdf,image/*"><button id="extractFile" class="secondary">Ler arquivo</button><button id="loadExample">Usar exemplo</button><button id="processData">Processar dados</button></div><div id="extractStatus" class="statusbox">Nenhum arquivo lido ainda.</div>
-      <details open><summary>❓ Como usar Excel, PDF ou imagem?</summary><p>Para Excel, use uma planilha com a primeira coluna contendo os nomes dos alunos e as demais colunas como Q1, Q2, Q3 etc. O sistema aceita células com 1/0, certo/errado, C/E, sim/não ou descritores D1, D2 etc. Para PDF, tenta ler texto pesquisável usando PDF.js. Se o PDF for escaneado/foto, usa OCR no navegador. Depois da leitura, confira a tabela extraída antes de processar.</p><p><b>Dica:</b> quando o PDF vier desalinhado, copie o resultado extraído, ajuste a primeira linha para <code>Aluno,Q1,Q2,Q3...</code> e use 1 para acerto e 0 para erro. Também aceita <code>C/E</code>, <code>A/E</code>, <code>✓/x</code> e <code>Sim/Não</code>.</p></details>
-      <div class="panel"><h3>Mapeamento das questões</h3><p class="hint">Depois de processar, informe o descritor de cada questão.</p><div id="questionMap" class="question-grid"></div></div>
+      <h2>📤 Importar avaliação</h2>
+      <p class="hint">Modelo oficial esperado: <b>1ª linha</b> com o número das questões; <b>2ª linha</b> com os descritores; <b>3ª linha</b> com o gabarito; <b>demais linhas</b> com as respostas de cada aluno. Até 50 alunos.</p>
+      <div class="panel modelbox">
+        <h3>Modelo da planilha</h3>
+        <div class="mini-table">
+          <span>Nome</span><span>Q1</span><span>Q2</span><span>Q3</span>
+          <span>Descritores</span><span>D16</span><span>D4</span><span>D10</span>
+          <span>Gabarito</span><span>C</span><span>A</span><span>E</span>
+          <span>Ana Silva</span><span>C</span><span>B</span><span>E</span>
+        </div>
+      </div>
+      <textarea id="pasteData" placeholder="Nome,Q1,Q2,Q3,Q4
+Descritores,D16,D4,D10,D19
+Gabarito,C,A,E,B
+Maria,C,A,D,B
+João,B,A,E,C"></textarea>
+      <div class="actions"><input type="file" id="fileInput" accept=".xlsx,.xls,.csv,.txt,.pdf,image/*"><button id="extractFile">Ler arquivo</button><button id="loadExample">Usar exemplo</button><button id="processData">Processar dados</button></div>
+      <p id="extractStatus" class="hint">Envie uma planilha Excel no modelo acima para leitura automática.</p>
+      <details><summary>❓ Como o sistema vai ler o Excel?</summary><p>Ele identifica automaticamente: linha 1 = questões; linha 2 = descritores de cada questão; linha 3 = gabarito; linhas seguintes = respostas dos alunos. Depois compara cada alternativa do aluno com o gabarito e vincula os erros aos descritores.</p></details>
+      <div class="panel"><h3>Mapeamento das questões</h3><p class="hint">Ao importar o Excel, o sistema preenche os descritores automaticamente. Você ainda pode ajustar manualmente.</p><div id="questionMap" class="question-grid"></div></div>
     </section>
 
     <section id="alunos" class="view">
@@ -69,6 +81,9 @@
 
     <footer>ETE Professor José Luiz de Mendonça • Sistema Inteligente de Diagnóstico Educacional • Versão GitHub/PWA</footer>
   </main>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>
