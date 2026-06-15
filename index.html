@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0f2e5f">
-  <title>ETE Professor José Luiz de Mendonça | Diagnóstico Pedagógico V45</title>
+  <title>ETE Professor José Luiz de Mendonça | Diagnóstico Pedagógico V46</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="css/style.css?v=44">
+  <link rel="stylesheet" href="css/style.css?v=46">
   <style>body.app-ready .view{display:none}body.app-ready .view.active{display:block}</style>
 </head>
 <body class="app-ready">
@@ -97,7 +97,10 @@
       <div class="panel"><h3>Ficha de exercícios individualizada</h3><p class="hint">Gera 10 questões a partir dos descritores prioritários do aluno. Quando houver questões cadastradas no banco local, elas são priorizadas.</p><label>Aluno<select id="sheetStudent"><option value="">Selecione</option></select></label><div class="actions compact"><button id="generateSheet">Gerar ficha</button><button id="printSheet" class="secondary">Exportar PDF</button></div><textarea id="sheetOutput" class="report-output" readonly></textarea></div>
       <div class="panel"><h3>Banco local de questões</h3><p class="hint">Cadastre questões próprias da escola por descritor. O banco alimenta fichas, recuperação, simulados e avaliações sem IA.</p><div class="bank-form"><select id="bankDisc"><option value="Língua Portuguesa">Língua Portuguesa</option><option value="Matemática">Matemática</option></select><input id="bankDesc" placeholder="Descritor, ex.: D15"><select id="bankDiff"><option>Fácil</option><option selected>Média</option><option>Difícil</option></select><select id="bankKey"><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option></select><textarea id="bankText" placeholder="Enunciado da questão"></textarea><textarea id="bankAlts" placeholder="A) ...\nB) ...\nC) ...\nD) ...\nE) ..."></textarea></div><div class="actions"><button id="addBankQuestion">Adicionar ao banco</button><button id="exportBank" class="secondary">Exportar banco</button><input type="file" id="importBank" accept=".json"></div><div id="bankList"></div></div></section>
 
-    <section id="tri" class="view"><h2>📈 TRI pedagógica</h2><p class="hint">Análise pedagógica da própria prova: dificuldade do item, discriminação e coerência do padrão de acertos. Não substitui a TRI oficial.</p><div id="triOutput" class="panel">Importe os dados para gerar a análise.</div></section>
+    <section id="tri" class="view"><h2>📈 TRI pedagógica</h2><p class="hint">Análise pedagógica da própria prova: dificuldade do item, discriminação, coerência do padrão de acertos e mapeamento do PDF da prova. Não substitui a TRI oficial.</p>
+      <div class="panel tri-help"><h3>Como interpretar a discriminação?</h3><p><b>Discriminação</b> indica o quanto uma questão separa estudantes com maior domínio daqueles que ainda apresentam dificuldades. Uma boa questão tende a ser mais acertada pelos alunos com melhor desempenho geral e mais errada pelos alunos com menor domínio.</p><div class="tri-scale"><span><b>&lt; 10 p.p.</b> fraca</span><span><b>10–24 p.p.</b> moderada</span><span><b>25–39 p.p.</b> boa</span><span><b>≥ 40 p.p.</b> excelente</span></div><p class="hint">Discriminação baixa não significa necessariamente questão ruim: pode indicar item muito fácil, muito difícil, mal formulado ou habilidade ainda não ensinada.</p></div>
+      <div class="panel"><h3>Upload da prova para mapeamento das questões</h3><p class="hint">Envie o PDF ou TXT da prova. O sistema tenta separar as questões, estimar o nível inicial por complexidade textual e, se houver resultados importados, recalibrar a dificuldade pela taxa de acertos da turma.</p><input type="file" id="proofFileInput" accept=".pdf,.txt,.text"><div class="actions compact"><button id="readProofFile">Ler prova</button><button id="clearProofMap" class="secondary">Limpar mapeamento</button></div><div id="proofMapStatus" class="statusbox">Nenhuma prova enviada.</div><div id="proofMapOutput"></div></div>
+      <div id="triOutput" class="panel">Importe os dados para gerar a análise.</div></section>
 
     <section id="coordenacao" class="view"><h2>🏫 Coordenação</h2><p class="hint">Área para leitura gestora: turmas críticas, descritores críticos, alunos prioritários e evolução geral.</p><div id="coordDashboard"></div><div id="disciplineComparison" class="panel"></div><div id="cloudCoordDashboard" class="panel"></div><div class="panel"><h3>Histórico de avaliações</h3><p class="hint">Salve momentos como Avaliação Diagnóstica, Simulado 1, Simulado 2 ou Recuperação.</p><input id="snapshotName" placeholder="Nome da avaliação, ex.: Simulado 1"><div class="actions"><button id="saveSnapshot">Salvar diagnóstico atual</button><button id="clearSnapshots" class="danger">Limpar histórico</button></div><div id="history"></div></div><div class="panel"><h3>Relatórios</h3><label>Aluno para relatório individual<select id="reportStudent"><option value="0">Primeiro aluno</option></select></label><div class="cards small"><button data-report="turma">Turma</button><button data-report="individual">Individual</button><button data-report="familia">Pais</button><button data-report="conselho">Conselho</button><button data-report="coordenacao">Coordenação</button></div><textarea id="reportOutput" class="report-output" readonly placeholder="O relatório aparecerá aqui."></textarea><div class="actions"><button id="copyReport">Copiar</button><button id="downloadReport">Baixar TXT</button><button id="exportReportPdf">Exportar PDF</button></div></div></section>
 
@@ -130,19 +133,19 @@
       </div>
       <div id="changelogBox" class="panel"></div></section>
 
-    <footer>ETE Professor José Luiz de Mendonça • Criado por Felipe Camargo • Versão 45.0</footer>
+    <footer>ETE Professor José Luiz de Mendonça • Criado por Felipe Camargo • Versão 46.0</footer>
   </main>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/app.js?v=44"></script>
-<script src="js/descritores.js?v=44"></script>
-<script src="js/importacao.js?v=44"></script>
-<script src="js/diagnostico.js?v=44"></script>
-<script src="js/tri.js?v=44"></script>
-<script src="js/relatorios.js?v=44"></script>
-<script src="js/exportacao.js?v=44"></script>
-<script src="js/banco-questoes.js?v=44"></script>
-<script src="js/supabase-sync.js?v=44"></script>
+<script src="js/app.js?v=46"></script>
+<script src="js/descritores.js?v=46"></script>
+<script src="js/importacao.js?v=46"></script>
+<script src="js/diagnostico.js?v=46"></script>
+<script src="js/tri.js?v=46"></script>
+<script src="js/relatorios.js?v=46"></script>
+<script src="js/exportacao.js?v=46"></script>
+<script src="js/banco-questoes.js?v=46"></script>
+<script src="js/supabase-sync.js?v=46"></script>
 </body>
 </html>

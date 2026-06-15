@@ -1,4 +1,4 @@
-const CACHE='ete-diagnostico-v45';
+const CACHE='ete-diagnostico-v46';
 const ASSETS=['./','./index.html','./css/style.css','./js/app.js','./js/descritores.js','./js/importacao.js','./js/diagnostico.js','./js/tri.js','./js/relatorios.js','./js/exportacao.js','./js/banco-questoes.js','./js/supabase-sync.js','./manifest.webmanifest','./descritores/portugues-em.json','./descritores/matematica-em.json','./assets/icons/icon.svg','./assets/logo-ete.png'];
 self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS).catch(()=>null)))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));self.clients.claim()});
