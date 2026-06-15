@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#123b66">
+  <title>ETE Professor José Luiz de Mendonça | Diagnóstico Pedagógico</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand"><span class="logo">ETE</span><div><strong>ETE Prof. José Luiz</strong><small>Diagnóstico Inteligente</small></div></div>
+    <nav>
+      <button class="nav active" data-view="inicio">🏠 Início</button>
+      <button class="nav" data-view="importar">📤 Importar Dados</button>
+      <button class="nav" data-view="alunos">👨‍🎓 Alunos</button>
+      <button class="nav" data-view="turma">📊 Turma</button>
+      <button class="nav" data-view="descritores">🧩 Descritores</button>
+      <button class="nav" data-view="evolucao">📈 Evolução</button>
+      <button class="nav" data-view="relatorios">📄 Relatórios</button>
+      <button class="nav" data-view="amanha">🎯 O que fazer amanhã?</button>
+      <button class="nav" data-view="config">⚙️ Configurações</button>
+    </nav>
+    <button class="ghost" id="toggleMenu">☰ Menu</button>
+  </aside>
+
+  <main class="main">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Sistema Inteligente de Diagnóstico Educacional</p>
+        <h1>ETE Professor José Luiz de Mendonça</h1>
+        <p>SAEB • SAEPE • BNCC • Projeto ENEM</p>
+      </div>
+      <div class="savebox"><span id="saveStatus">Salvamento automático ativo</span><small id="lastSave">Ainda não salvo</small></div>
+    </header>
+
+    <section id="inicio" class="view active">
+      <div class="cards" id="summaryCards"></div>
+      <div class="panel"><h2>Transforme resultados em ações pedagógicas</h2><p>Importe ou cole os resultados questão por questão, vincule cada questão a um descritor e gere diagnósticos individuais, relatórios e planos de intervenção.</p><div class="actions"><button data-go="importar">Começar importando dados</button><button data-go="descritores" class="secondary">Consultar descritores</button></div></div>
+    </section>
+
+    <section id="importar" class="view">
+      <h2>📤 Importar avaliação</h2><p class="hint">Cole uma tabela ou envie um CSV. Modelo: primeira linha com <b>Aluno,Q1,Q2,Q3...</b> e linhas com 1 para acerto e 0 para erro. Até 50 alunos.</p>
+      <textarea id="pasteData" placeholder="Aluno,Q1,Q2,Q3,Q4\nMaria,1,0,1,1\nJoão,0,1,1,0"></textarea>
+      <div class="actions"><input type="file" id="fileInput" accept=".csv,.txt,.pdf,image/*"><button id="loadExample">Usar exemplo</button><button id="processData">Processar dados</button></div>
+      <details><summary>❓ Como usar PDF ou imagem?</summary><p>Para manter o sistema leve, o caminho mais confiável é exportar a planilha do resultado em CSV ou copiar e colar a tabela. PDFs/imagens podem ser anexados para registro, mas a leitura automática depende da qualidade do arquivo e do navegador.</p></details>
+      <div class="panel"><h3>Mapeamento das questões</h3><p class="hint">Depois de processar, informe o descritor de cada questão.</p><div id="questionMap" class="question-grid"></div></div>
+    </section>
+
+    <section id="alunos" class="view">
+      <h2>👨‍🎓 Análise individual</h2><p class="hint">Escolha um aluno para gerar feedback, descritores críticos e plano de suporte.</p><div class="split"><div><input id="studentSearch" placeholder="Buscar aluno..."><div id="studentList" class="list"></div></div><div id="studentDetail" class="panel empty">Selecione um aluno.</div></div>
+    </section>
+
+    <section id="turma" class="view"><h2>📊 Resultado geral da turma</h2><p class="hint">Resumo, semáforo, descritores críticos, questões com menor desempenho e mapa de calor.</p><div id="classReport"></div><div class="panel"><h3>Mapa de calor</h3><p class="hint">Verde = acerto. Vermelho = erro. Linhas = alunos. Colunas = questões.</p><div id="heatmap" class="heatmap"></div></div></section>
+
+    <section id="descritores" class="view"><h2>🧩 Biblioteca de descritores</h2><p class="hint">Lista consultável com o texto do descritor, explicação, exemplos e intervenção sugerida.</p><div class="toolbar"><select id="descriptorDiscipline"><option value="todos">Português e Matemática</option><option value="Língua Portuguesa">Língua Portuguesa</option><option value="Matemática">Matemática</option></select><input id="descriptorSearch" placeholder="Buscar por D1, porcentagem, inferir..."></div><div id="descriptorList"></div></section>
+
+    <section id="evolucao" class="view"><h2>📈 Comparar avaliações</h2><p class="hint">Salve o resultado atual como diagnóstico histórico e compare a evolução da turma.</p><div class="actions"><button id="saveSnapshot">Salvar diagnóstico atual</button><button id="clearSnapshots" class="danger">Limpar histórico</button></div><div id="history"></div></section>
+
+    <section id="relatorios" class="view"><h2>📄 Relatórios</h2><div class="cards small"><button data-report="turma">Relatório da turma</button><button data-report="familia">Relatório para família</button><button data-report="conselho">Conselho de classe</button><button data-report="coordenacao">Coordenação</button></div><textarea id="reportOutput" readonly placeholder="O relatório aparecerá aqui."></textarea><div class="actions"><button id="copyReport">Copiar relatório</button><button id="downloadReport">Baixar TXT</button><button onclick="window.print()">Imprimir / PDF</button></div></section>
+
+    <section id="amanha" class="view"><h2>🎯 O que fazer amanhã?</h2><p class="hint">Sugestão prática com base nos descritores mais críticos da turma.</p><div id="tomorrowPlan" class="panel"></div></section>
+
+    <section id="config" class="view"><h2>⚙️ Configurações e backup</h2><div class="panel"><p>Os dados ficam salvos automaticamente no navegador deste aparelho. Só são apagados se você solicitar.</p><div class="actions"><button id="exportJson">Exportar backup JSON</button><input type="file" id="importJson" accept=".json"><button id="clearAll" class="danger">Apagar todos os dados</button></div></div></section>
+
+    <footer>ETE Professor José Luiz de Mendonça • Sistema Inteligente de Diagnóstico Educacional • Versão GitHub/PWA</footer>
+  </main>
+<script src="js/app.js"></script>
+</body>
+</html>

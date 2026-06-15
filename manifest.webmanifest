@@ -1,0 +1,16 @@
+{
+  "name": "Diagnóstico Pedagógico ETE",
+  "short_name": "Diagnóstico ETE",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f6f8fb",
+  "theme_color": "#123b66",
+  "description": "Sistema Inteligente de Diagnóstico Educacional - ETE Professor José Luiz de Mendonça",
+  "icons": [
+    {
+      "src": "assets/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
