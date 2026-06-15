@@ -1,4 +1,4 @@
-# ETE Professor José Luiz de Mendonça — Diagnóstico Pedagógico V40
+# ETE Professor José Luiz de Mendonça — Diagnóstico Pedagógico V43
 
 Sistema Inteligente de Diagnóstico Educacional criado por Felipe Camargo.
 
@@ -6,16 +6,15 @@ Sistema Inteligente de Diagnóstico Educacional criado por Felipe Camargo.
 
 Importar resultados de avaliações, analisar desempenho por aluno e por descritor, gerar relatórios pedagógicos, Mapa da Mina, fichas de exercícios e leitura gestora para coordenação.
 
-## Novidades V40
+## Novidades V43
 
-- Validação obrigatória antes da análise: relatórios só devem ser gerados com estrutura válida.
-- Assistente guiado: Importar → Validar → Diagnosticar → Intervir → Salvar.
-- Comparação Português × Matemática por turma a partir do histórico local.
-- Painel da coordenação ampliado com turma crítica, descritores críticos e leitura gestora.
-- Banco local de questões ampliado, com maior cobertura por disciplina e descritor.
-- Modo local continua sendo o fluxo principal.
-- Supabase permanece opcional e configurável pela tela de Configurações.
-- OCR continua como recurso auxiliar, sempre com conferência manual.
+- Aba de Diagnóstico com elementos gráficos: distribuição por nível, barras por nível, descritores críticos e questões críticas.
+- Gráfico de pizza em CSS para os níveis Elementar I, Elementar II, Básico e Desejável.
+- Gráficos de barras sem dependências externas, mantendo o site leve e compatível com GitHub Pages.
+- Nova seção “Análise pedagógica e sugestões ao professor”.
+- Sugestões mais objetivas para recomposição, reagrupamento por descritor, correção estratégica e acompanhamento.
+- Mapa da Mina permanece individualizado e sem IA paga.
+- Leitura por foto/OCR continua removida; o caminho principal é Excel/PDF/manual.
 
 ## Formato recomendado do Excel
 
@@ -43,9 +42,3 @@ Antes de usar o modo institucional, execute o script `supabase_ete_diagnostico_s
 4. Gerar relatórios.
 5. Gerar recuperação/ficha.
 6. Salvar backup local ou sincronizar na nuvem.
-
-
-## Correções V40
-- Botão **Confirmar e analisar** movido para a área de Conferência obrigatória, sempre visível após importar Excel/PDF ou usar digitação manual.
-- Removida a opção de leitura por foto/OCR do gabarito para reduzir instabilidade e simplificar o fluxo principal.
-- Fluxo recomendado: Excel → Conferência obrigatória → Confirmar e analisar → Relatórios.
