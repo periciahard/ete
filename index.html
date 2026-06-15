@@ -10,7 +10,7 @@
 </head>
 <body>
   <aside class="sidebar" id="sidebar">
-    <div class="brand"><span class="logo">ETE</span><div><strong>ETE Prof. José Luiz</strong><small>Diagnóstico Inteligente</small></div></div>
+    <div class="brand"><img class="brand-logo" src="assets/logo-ete.png" alt="Logo ETE Professor José Luiz de Mendonça"><div><strong>ETE Prof. José Luiz</strong><small>Diagnóstico Inteligente</small></div></div>
     <nav>
       <button class="nav active" data-view="inicio">🏠 Início</button>
       <button class="nav" data-view="importar">📤 Importar Dados</button>
@@ -27,10 +27,14 @@
 
   <main class="main">
     <header class="hero">
-      <div>
-        <p class="eyebrow">Sistema Inteligente de Diagnóstico Educacional</p>
-        <h1>ETE Professor José Luiz de Mendonça</h1>
-        <p>SAEB • SAEPE • BNCC • Projeto ENEM</p>
+      <div class="hero-title">
+        <img class="hero-logo" src="assets/logo-ete.png" alt="Logo ETE Professor José Luiz de Mendonça">
+        <div>
+          <p class="eyebrow">Sistema Inteligente de Diagnóstico Educacional</p>
+          <h1>ETE Professor José Luiz de Mendonça</h1>
+          <p>SAEB • SAEPE • BNCC • Projeto ENEM</p>
+          <p class="creator">Criado por Felipe Camargo</p>
+        </div>
       </div>
       <div class="savebox"><span id="saveStatus">Salvamento automático ativo</span><small id="lastSave">Ainda não salvo</small></div>
     </header>
@@ -41,26 +45,12 @@
     </section>
 
     <section id="importar" class="view">
-      <h2>📤 Importar avaliação</h2>
-      <p class="hint">Modelo oficial esperado: <b>1ª linha</b> com o número das questões; <b>2ª linha</b> com os descritores; <b>3ª linha</b> com o gabarito; <b>demais linhas</b> com as respostas de cada aluno. Até 50 alunos.</p>
-      <div class="panel modelbox">
-        <h3>Modelo da planilha</h3>
-        <div class="mini-table">
-          <span>Nome</span><span>Q1</span><span>Q2</span><span>Q3</span>
-          <span>Descritores</span><span>D16</span><span>D4</span><span>D10</span>
-          <span>Gabarito</span><span>C</span><span>A</span><span>E</span>
-          <span>Ana Silva</span><span>C</span><span>B</span><span>E</span>
-        </div>
-      </div>
-      <textarea id="pasteData" placeholder="Nome,Q1,Q2,Q3,Q4
-Descritores,D16,D4,D10,D19
-Gabarito,C,A,E,B
-Maria,C,A,D,B
-João,B,A,E,C"></textarea>
-      <div class="actions"><input type="file" id="fileInput" accept=".xlsx,.xls,.csv,.txt,.pdf,image/*"><button id="extractFile">Ler arquivo</button><button id="loadExample">Usar exemplo</button><button id="processData">Processar dados</button></div>
-      <p id="extractStatus" class="hint">Envie uma planilha Excel no modelo acima para leitura automática.</p>
-      <details><summary>❓ Como o sistema vai ler o Excel?</summary><p>Ele identifica automaticamente: linha 1 = questões; linha 2 = descritores de cada questão; linha 3 = gabarito; linhas seguintes = respostas dos alunos. Depois compara cada alternativa do aluno com o gabarito e vincula os erros aos descritores.</p></details>
-      <div class="panel"><h3>Mapeamento das questões</h3><p class="hint">Ao importar o Excel, o sistema preenche os descritores automaticamente. Você ainda pode ajustar manualmente.</p><div id="questionMap" class="question-grid"></div></div>
+      <h2>📤 Importar avaliação</h2><p class="hint">Cole uma tabela ou envie um Excel/CSV. Modelo: 1ª linha com questões, 2ª linha com descritores, 3ª linha com gabarito e demais linhas com respostas dos alunos. Até 50 alunos.</p>
+      <div class="panel modelbox"><h3>Disciplina da avaliação</h3><p class="hint">Escolha a disciplina para filtrar descritores, relatórios e intervenções.</p><select id="assessmentDiscipline"><option value="Língua Portuguesa">Língua Portuguesa</option><option value="Matemática">Matemática</option></select></div>
+      <textarea id="pasteData" placeholder="Aluno,Q1,Q2,Q3,Q4\nMaria,1,0,1,1\nJoão,0,1,1,0"></textarea>
+      <div class="actions"><input type="file" id="fileInput" accept=".csv,.txt,.pdf,image/*"><button id="loadExample">Usar exemplo</button><button id="processData">Processar dados</button></div>
+      <details><summary>❓ Como usar PDF ou imagem?</summary><p>Para manter o sistema leve, o caminho mais confiável é exportar a planilha do resultado em CSV ou copiar e colar a tabela. PDFs/imagens podem ser anexados para registro, mas a leitura automática depende da qualidade do arquivo e do navegador.</p></details>
+      <div class="panel"><h3>Mapeamento das questões</h3><p class="hint">Depois de processar, informe o descritor de cada questão.</p><div id="questionMap" class="question-grid"></div></div>
     </section>
 
     <section id="alunos" class="view">
@@ -77,9 +67,9 @@ João,B,A,E,C"></textarea>
 
     <section id="amanha" class="view"><h2>🎯 O que fazer amanhã?</h2><p class="hint">Sugestão prática com base nos descritores mais críticos da turma.</p><div id="tomorrowPlan" class="panel"></div></section>
 
-    <section id="config" class="view"><h2>⚙️ Configurações e backup</h2><div class="panel"><p>Os dados ficam salvos automaticamente no navegador deste aparelho. Só são apagados se você solicitar.</p><div class="actions"><button id="exportJson">Exportar backup JSON</button><input type="file" id="importJson" accept=".json"><button id="clearAll" class="danger">Apagar todos os dados</button></div></div></section>
+    <section id="config" class="view"><h2>⚙️ Configurações e backup</h2><div class="panel"><p>Os dados ficam salvos automaticamente no navegador deste aparelho. Só são apagados se você solicitar.</p><label>Disciplina padrão da avaliação<select id="configDiscipline"><option value="Língua Portuguesa">Língua Portuguesa</option><option value="Matemática">Matemática</option></select></label><div class="actions"><button id="exportJson">Exportar backup JSON</button><input type="file" id="importJson" accept=".json"><button id="clearAll" class="danger">Apagar todos os dados</button></div></div></section>
 
-    <footer>ETE Professor José Luiz de Mendonça • Sistema Inteligente de Diagnóstico Educacional • Versão GitHub/PWA</footer>
+    <footer>ETE Professor José Luiz de Mendonça • Sistema Inteligente de Diagnóstico Educacional • Criado por Felipe Camargo • Versão GitHub/PWA</footer>
   </main>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>

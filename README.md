@@ -71,3 +71,13 @@ A leitura considera:
 4. demais linhas = respostas dos alunos.
 
 O sistema compara cada resposta do aluno com o gabarito e usa os descritores da segunda linha para gerar diagnóstico da turma, feedback individual e plano de intervenção.
+
+
+## Créditos
+Criado por Felipe Camargo.
+
+## Atualização V14
+- Inclusão da logo da escola.
+- Seleção de disciplina: Língua Portuguesa ou Matemática.
+- Filtro de descritores conforme a disciplina escolhida.
+- Modelo de importação: 1ª linha = questões; 2ª linha = descritores; 3ª linha = gabarito; demais linhas = respostas dos alunos.
