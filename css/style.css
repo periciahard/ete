@@ -7,3 +7,6 @@ code{background:#f1f5f9;padding:2px 6px;border-radius:6px}
 .question-grid label small{display:block;color:#667085;margin:2px 0 6px;font-size:.78rem}
 .brand-logo{width:58px;height:58px;object-fit:contain;border-radius:14px;background:#fff;padding:4px;box-shadow:0 6px 18px rgba(0,0,0,.18)}
 .hero-title{display:flex;align-items:center;gap:18px}.hero-logo{width:92px;height:92px;object-fit:contain;background:rgba(255,255,255,.94);border-radius:20px;padding:6px;box-shadow:0 8px 24px rgba(0,0,0,.18)}.creator{margin:.35rem 0 0;font-weight:800;opacity:.95}.modelbox select{max-width:420px}@media(max-width:760px){.hero-title{align-items:flex-start}.hero-logo{width:72px;height:72px}.brand-logo{width:48px;height:48px}}@media(max-width:520px){.hero-title{flex-direction:column}.hero-logo{width:86px;height:86px}}
+
+.report-output{min-height:420px;line-height:1.5;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;font-size:14px}
+#fileInput{background:#fff;border:2px dashed #c7d7ea}

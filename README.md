@@ -1,4 +1,6 @@
-# Diagnóstico Pedagógico Inteligente — ETE Professor José Luiz de Mendonça
+# Diagnóstico Pedagógico Inteligente
+
+**Versão 15.0** — ETE Professor José Luiz de Mendonça
 
 Sistema leve em HTML/CSS/JS para diagnóstico pedagógico por aluno, turma e descritor, com foco em SAEB, SAEPE, BNCC e Projeto ENEM.
 

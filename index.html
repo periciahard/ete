@@ -48,7 +48,8 @@
       <h2>📤 Importar avaliação</h2><p class="hint">Cole uma tabela ou envie um Excel/CSV. Modelo: 1ª linha com questões, 2ª linha com descritores, 3ª linha com gabarito e demais linhas com respostas dos alunos. Até 50 alunos.</p>
       <div class="panel modelbox"><h3>Disciplina da avaliação</h3><p class="hint">Escolha a disciplina para filtrar descritores, relatórios e intervenções.</p><select id="assessmentDiscipline"><option value="Língua Portuguesa">Língua Portuguesa</option><option value="Matemática">Matemática</option></select></div>
       <textarea id="pasteData" placeholder="Aluno,Q1,Q2,Q3,Q4\nMaria,1,0,1,1\nJoão,0,1,1,0"></textarea>
-      <div class="actions"><input type="file" id="fileInput" accept=".csv,.txt,.pdf,image/*"><button id="loadExample">Usar exemplo</button><button id="processData">Processar dados</button></div>
+      <div class="actions"><input type="file" id="fileInput" accept=".xlsx,.xls,.csv,.txt,.pdf,image/*"><button id="extractFile">Ler arquivo</button><button id="loadExample">Usar exemplo</button><button id="processData">Processar dados</button></div>
+      <div id="extractStatus" class="statusbox">Nenhum arquivo selecionado. Para Excel, use o modelo: linha 1 = questões, linha 2 = descritores, linha 3 = gabarito, demais linhas = respostas dos alunos.</div>
       <details><summary>❓ Como usar PDF ou imagem?</summary><p>Para manter o sistema leve, o caminho mais confiável é exportar a planilha do resultado em CSV ou copiar e colar a tabela. PDFs/imagens podem ser anexados para registro, mas a leitura automática depende da qualidade do arquivo e do navegador.</p></details>
       <div class="panel"><h3>Mapeamento das questões</h3><p class="hint">Depois de processar, informe o descritor de cada questão.</p><div id="questionMap" class="question-grid"></div></div>
     </section>
@@ -63,13 +64,13 @@
 
     <section id="evolucao" class="view"><h2>📈 Comparar avaliações</h2><p class="hint">Salve o resultado atual como diagnóstico histórico e compare a evolução da turma.</p><div class="actions"><button id="saveSnapshot">Salvar diagnóstico atual</button><button id="clearSnapshots" class="danger">Limpar histórico</button></div><div id="history"></div></section>
 
-    <section id="relatorios" class="view"><h2>📄 Relatórios</h2><div class="cards small"><button data-report="turma">Relatório da turma</button><button data-report="familia">Relatório para família</button><button data-report="conselho">Conselho de classe</button><button data-report="coordenacao">Coordenação</button></div><textarea id="reportOutput" readonly placeholder="O relatório aparecerá aqui."></textarea><div class="actions"><button id="copyReport">Copiar relatório</button><button id="downloadReport">Baixar TXT</button><button onclick="window.print()">Imprimir / PDF</button></div></section>
+    <section id="relatorios" class="view"><h2>📄 Relatórios</h2><div class="cards small"><button data-report="turma">Relatório da turma</button><button data-report="familia">Relatório para família</button><button data-report="conselho">Conselho de classe</button><button data-report="coordenacao">Coordenação</button></div><textarea id="reportOutput" class="report-output" readonly placeholder="O relatório aparecerá aqui."></textarea><div class="actions"><button id="copyReport">Copiar relatório</button><button id="downloadReport">Baixar TXT</button><button onclick="window.print()">Imprimir / PDF</button></div></section>
 
     <section id="amanha" class="view"><h2>🎯 O que fazer amanhã?</h2><p class="hint">Sugestão prática com base nos descritores mais críticos da turma.</p><div id="tomorrowPlan" class="panel"></div></section>
 
     <section id="config" class="view"><h2>⚙️ Configurações e backup</h2><div class="panel"><p>Os dados ficam salvos automaticamente no navegador deste aparelho. Só são apagados se você solicitar.</p><label>Disciplina padrão da avaliação<select id="configDiscipline"><option value="Língua Portuguesa">Língua Portuguesa</option><option value="Matemática">Matemática</option></select></label><div class="actions"><button id="exportJson">Exportar backup JSON</button><input type="file" id="importJson" accept=".json"><button id="clearAll" class="danger">Apagar todos os dados</button></div></div></section>
 
-    <footer>ETE Professor José Luiz de Mendonça • Sistema Inteligente de Diagnóstico Educacional • Criado por Felipe Camargo • Versão GitHub/PWA</footer>
+    <footer>ETE Professor José Luiz de Mendonça • Sistema Inteligente de Diagnóstico Educacional • Criado por Felipe Camargo • Versão 15.0 GitHub/PWA</footer>
   </main>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
