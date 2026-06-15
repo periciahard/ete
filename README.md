@@ -1,6 +1,6 @@
 # Diagnóstico Pedagógico Inteligente
 
-**Versão 17.0** — ETE Professor José Luiz de Mendonça
+**Versão 18.0** — ETE Professor José Luiz de Mendonça
 
 Sistema leve em HTML/CSS/JS para diagnóstico pedagógico por aluno, turma e descritor, com foco em SAEB, SAEPE, BNCC e Projeto ENEM.
 
@@ -56,7 +56,7 @@ A biblioteca de descritores é editável nos arquivos:
 Recomenda-se conferir e ajustar conforme a matriz vigente adotada pela rede, pelo SAEPE/CAEd e pelo SAEB/INEP.
 
 
-## Modelo de Excel aceito na V13
+## Modelo de Excel aceito na V18
 
 O sistema agora reconhece automaticamente o modelo usado pela ETE:
 
@@ -79,14 +79,14 @@ O sistema compara cada resposta do aluno com o gabarito e usa os descritores da 
 ## Créditos
 Criado por Felipe Camargo.
 
-## Atualização V14
+## Atualização V18
 - Inclusão da logo da escola.
 - Seleção de disciplina: Língua Portuguesa ou Matemática.
 - Filtro de descritores conforme a disciplina escolhida.
 - Modelo de importação: 1ª linha = questões; 2ª linha = descritores; 3ª linha = gabarito; demais linhas = respostas dos alunos.
 
 
-## Atualização V16
+## Atualização V18
 - Inclusão do botão **Mapa da Mina**.
 - Geração de cronograma individualizado de 4 semanas por aluno.
 - Cada semana contém 1h de estudo e 1h de resolução de exercícios.
