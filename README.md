@@ -1,20 +1,33 @@
-# ETE Professor José Luiz de Mendonça — Diagnóstico Pedagógico V46
+# ETE Professor José Luiz de Mendonça — Diagnóstico Pedagógico V47
 
-Versão com Coordenação Avançada e TRI Pedagógica Ampliada.
+Versão institucional do sistema de diagnóstico educacional.
 
-## Principais recursos
+## Novidades da V47
 
-- Importação por Excel, PDF ou digitação manual.
-- Validação obrigatória antes da análise.
-- Relatórios por aluno, turma, família, conselho e coordenação.
-- Classificação pedagógica: Elementar I, Elementar II, Básico e Desejável.
-- Aba Coordenação com leitura gestora, descritores críticos, alunos prioritários e plano de ação.
-- Aba TRI com explicação de discriminação, dificuldade dos itens, coerência dos alunos e upload de PDF/TXT da prova para mapeamento de questões.
-- Mapeamento da prova: questão × descritor × nível inicial × taxa de acerto × nível final recalibrado.
-- Modo local como padrão e Supabase opcional.
+- Criação obrigatória da avaliação antes do upload.
+- Cada avaliação é identificada por turma, disciplina, tipo e data.
+- Upload de Excel/PDF e digitação manual ficam bloqueados até a avaliação ser salva.
+- Histórico local de avaliações salvas.
+- Troca de turma/disciplina/tipo/data preserva a avaliação anterior e cria nova avaliação.
+- Duplicação de estrutura: copia questões, descritores e gabarito para outra turma, sem copiar respostas dos alunos.
 
-## Observação técnica
+## Fluxo recomendado
 
-A TRI apresentada é pedagógica e interna, baseada em padrões de acerto, dificuldade empírica e discriminação simples. Não substitui a TRI oficial do ENEM/SAEPE.
+1. Preencher título, turma, disciplina, tipo, data e professor.
+2. Clicar em **Salvar avaliação**.
+3. Importar Excel ou digitar dados manualmente.
+4. Validar estrutura.
+5. Confirmar e analisar.
+6. Gerar relatórios, Mapa da Mina e fichas individualizadas.
 
-Criado por Felipe Camargo.
+## Modelo de Excel aceito
+
+Modelo com coluna inicial:
+
+| Nome | Q1 | Q2 | ... |
+|---|---|---|---|
+| Descritores | D1 | D2 | ... |
+| Gabarito | A | C | ... |
+| Aluno | A | B | ... |
+
+Também aceita modelo sem a coluna inicial, desde que a primeira linha contenha as questões.

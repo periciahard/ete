@@ -11,11 +11,11 @@
 /* V40 - validação obrigatória, assistente guiado e comparação */
 button:disabled{opacity:.45;cursor:not-allowed;filter:grayscale(.2);transform:none!important}.validationGate{border-left:5px solid var(--yellow)}.wizard-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:16px 0}.wizard-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:var(--shadow);border-top:5px solid #b8c2d5}.wizard-card b{display:block;color:var(--blue);margin-bottom:6px}.wizard-card span{color:var(--muted);font-size:13px}.wizard-card.ok{border-top-color:var(--green)}.wizard-card.bad{border-top-color:var(--red)}.wizard-card.wait{border-top-color:var(--yellow)}#disciplineComparison .preview-row{grid-template-columns:170px 120px 120px 130px 110px 110px}.assistant-callout{background:#f7fbff;border:1px dashed #b6c9e8;border-radius:18px;padding:14px}@media(max-width:650px){#disciplineComparison .preview-row{grid-template-columns:150px 100px 100px 110px 100px 100px}.wizard-grid{grid-template-columns:1fr 1fr}}
 
-/* V46 - níveis pedagógicos e interface condensada */
+/* V47 - níveis pedagógicos e interface condensada */
 .compact-modules{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}.actions.compact{gap:8px}.actions.compact button{min-width:180px}.level-e1{background:#ffe8eb!important;color:#94111f!important}.level-e2{background:#fff2d6!important;color:#734c00!important}.level-basic{background:#eef5ff!important;color:#163e78!important}.level-des{background:#e5fff3!important;color:#006b43!important}.status-level-note{border-left:5px solid var(--yellow)}
 
 
-/* V46 - gráficos e análises visuais */
+/* V47 - gráficos e análises visuais */
 .chart-grid{display:grid;grid-template-columns:repeat(2,minmax(280px,1fr));gap:16px;margin:16px 0}
 .chart-card h3{margin-top:0}
 .pie-wrap{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
@@ -38,7 +38,7 @@ button:disabled{opacity:.45;cursor:not-allowed;filter:grayscale(.2);transform:no
 .insight p{margin:.45rem 0 0;color:var(--text)}
 .action-list li{margin-bottom:10px}
 @media(max-width:900px){.chart-grid,.insight-grid{grid-template-columns:1fr}.bar-row{grid-template-columns:1fr}.bar-value{text-align:left}.pie{width:145px;height:145px}}
-/* V46 - análise individual avançada */
+/* V47 - análise individual avançada */
 .student-report h3{margin:0 0 6px}
 .student-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:12px}
 .mini-score{min-width:120px;text-align:center;background:#edf5ff;border:1px solid #cfe1ff;border-radius:16px;padding:12px;color:#123a71}
@@ -55,7 +55,7 @@ button:disabled{opacity:.45;cursor:not-allowed;filter:grayscale(.2);transform:no
 .student-report .hint{font-size:12px;color:#5b6880}
 @media(max-width:850px){.student-head,.student-grid{display:block}.mini-score{margin:10px 0}.student-grid .panel{margin:10px 0}}
 
-/* V46 - Coordenação avançada e TRI com mapeamento da prova */
+/* V47 - Coordenação avançada e TRI com mapeamento da prova */
 .tri-help{border-left:5px solid var(--blue2)}
 .tri-scale{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:12px 0}
 .tri-scale span{display:block;background:#f7fbff;border:1px solid var(--line);border-radius:14px;padding:12px;text-align:center}
@@ -64,3 +64,8 @@ button:disabled{opacity:.45;cursor:not-allowed;filter:grayscale(.2);transform:no
 .action-coord{border-left:5px solid var(--green);background:linear-gradient(180deg,#ffffff,#f7fbff)}
 .action-coord ol{padding-left:22px}.action-coord li{margin:10px 0;line-height:1.45}
 @media(max-width:760px){.proof-table .preview-row{grid-template-columns:90px 90px 100px 80px 90px 220px}.tri-scale{grid-template-columns:1fr 1fr}}
+
+
+/* V47 - avaliação obrigatória antes do upload */
+.assessment-history{display:grid;gap:10px}.assessment-item{display:flex;justify-content:space-between;align-items:center;gap:12px;border:1px solid var(--line);border-radius:16px;padding:12px;background:#fff}.assessment-item.active{border-color:var(--green);box-shadow:0 0 0 3px rgba(0,155,97,.12)}.assessment-actions{display:flex;gap:8px;flex-wrap:wrap}.activeAssessmentPanel{border-left:6px solid var(--green)}button:disabled,input:disabled,textarea:disabled{opacity:.55;cursor:not-allowed;filter:grayscale(.1)}
+@media(max-width:720px){.assessment-item{align-items:flex-start;flex-direction:column}.assessment-actions{width:100%}.assessment-actions button{flex:1}}

@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0f2e5f">
-  <title>ETE Professor José Luiz de Mendonça | Diagnóstico Pedagógico V46</title>
+  <title>ETE Professor José Luiz de Mendonça | Diagnóstico Pedagógico V47</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="css/style.css?v=46">
+  <link rel="stylesheet" href="css/style.css?v=47">
   <style>body.app-ready .view{display:none}body.app-ready .view.active{display:block}</style>
 </head>
 <body class="app-ready">
@@ -67,16 +67,18 @@
     <section id="importar" class="view">
       <h2>📥 Importação</h2>
       <p class="hint">Escolha um caminho. O modelo recomendado é: 1ª linha = questões; 2ª linha = descritores; 3ª linha = gabarito; demais linhas = respostas dos alunos.</p>
-      <div class="panel modelbox"><h3>Identificação da avaliação</h3><p class="hint">Esses dados organizam o histórico, a coordenação e o salvamento na nuvem. O foco continua sendo importar, analisar e gerar relatórios.</p><div class="grid2"><label>Título da avaliação<input id="assessmentTitle" placeholder="Ex.: Diagnóstica - 1º bimestre"></label><label>Turma<input id="assessmentClass" placeholder="Ex.: 1º A"></label><label>Disciplina<select id="assessmentDiscipline"><option value="Língua Portuguesa">Língua Portuguesa</option><option value="Matemática">Matemática</option></select></label><label>Tipo<select id="assessmentType"><option value="diagnostica">Avaliação Diagnóstica</option><option value="simulado1">Simulado 1</option><option value="simulado2">Simulado 2</option><option value="recuperacao">Recuperação</option><option value="bimestral">Avaliação Bimestral</option></select></label><label>Data da avaliação<input id="assessmentDate" type="date"></label></div></div>
+      <div class="panel modelbox"><h3>1. Identificação da avaliação</h3><p class="hint">Preencha e salve estes dados antes de importar a planilha. Cada combinação de turma, disciplina, tipo e data cria uma avaliação independente, evitando que a planilha de uma turma apague a outra.</p><div class="grid2"><label>Título da avaliação *<input id="assessmentTitle" placeholder="Ex.: Diagnóstica - 1º bimestre"></label><label>Turma *<input id="assessmentClass" placeholder="Ex.: 1º A"></label><label>Disciplina *<select id="assessmentDiscipline"><option value="Língua Portuguesa">Língua Portuguesa</option><option value="Matemática">Matemática</option></select></label><label>Tipo *<select id="assessmentType"><option value="diagnostica">Avaliação Diagnóstica</option><option value="simulado1">Simulado 1</option><option value="simulado2">Simulado 2</option><option value="recuperacao">Recuperação</option><option value="bimestral">Avaliação Bimestral</option></select></label><label>Data da avaliação *<input id="assessmentDate" type="date"></label><label>Professor responsável<input id="assessmentTeacher" placeholder="Ex.: Felipe Camargo"></label></div><div id="assessmentSaveStatus" class="statusbox status-work">Nenhuma avaliação ativa. Salve a avaliação para liberar a importação.</div><div class="actions"><button id="saveAssessmentMeta">Salvar avaliação</button><button id="newAssessment" class="secondary">Nova avaliação</button><button id="duplicateStructure" class="secondary">Duplicar estrutura</button></div></div>
+      <div class="panel activeAssessmentPanel"><h3>Avaliação atual</h3><div id="activeAssessmentBox" class="statusbox status-work">Nenhuma avaliação salva selecionada.</div></div>
+      <div class="panel"><h3>Histórico de avaliações</h3><p class="hint">Abra avaliações já salvas ou duplique a estrutura de uma prova para outra turma. Duplicar estrutura copia questões, descritores e gabarito, mas não copia respostas dos alunos.</p><div id="assessmentHistory" class="assessment-history"></div></div>
       <div class="panel validationGate"><h3>Conferência obrigatória</h3><p class="hint">Depois de ler ou digitar os dados, o sistema precisa confirmar se encontrou questões, descritores, gabarito e alunos.</p><div id="importGate" class="statusbox status-work">Aguardando importação ou validação.</div><div class="actions"><button id="validateDataGate" class="secondary">1. Validar estrutura</button><button id="confirmImport" disabled>2. Confirmar e analisar</button></div></div>
       <div class="import-tabs">
         <button class="tabBtn active" data-tab="excelTab">Importar Excel</button>
         <button class="tabBtn" data-tab="pdfTab">Importar PDF</button>
         <button class="tabBtn" data-tab="manualTab">Digitação manual</button>
       </div>
-      <div id="excelTab" class="tabPane active panel"><h3>Importar Excel</h3><input type="file" id="fileInput" accept=".xlsx,.xls,.csv,.txt"><div class="actions"><button id="extractFile">Ler arquivo</button><button id="loadExample" class="secondary">Usar exemplo</button></div><div id="extractStatus" class="statusbox">Nenhum arquivo selecionado. Após importar, confira a validação e clique em Confirmar e analisar.</div></div>
-      <div id="pdfTab" class="tabPane panel"><h3>Importar PDF</h3><div id="pdfWarning" class="statusbox status-work">Atenção: PDF é caminho secundário. Planilhas Excel são muito mais confiáveis. Após ler PDF, confira a tabela antes de analisar.</div><p class="hint">PDFs de tabela podem falhar. O sistema tenta extrair texto, mas sempre exige conferência antes da análise.</p><input type="file" id="pdfOnlyInput" accept=".pdf"><button id="readPdfOnly">Ler PDF</button></div>
-      <div id="manualTab" class="tabPane panel"><h3>Digitação manual</h3><p class="hint">Cole ou digite a tabela. Também serve para adicionar um aluno que faltou e respondeu depois.</p><textarea id="pasteData" placeholder="Aluno\tQ1\tQ2\t...\nDescritores\tD1\tD2\t...\nGabarito\tA\tC\t...\nAna Silva\tA\tB\t..."></textarea><div class="actions"><button id="validateData">1. Validar estrutura</button></div><div id="validationResult"></div><div id="previewImport"></div></div>
+      <div id="excelTab" class="tabPane active panel"><h3>2. Importar Excel</h3><p class="hint">A importação só é liberada depois que a avaliação for salva.</p><input type="file" id="fileInput" accept=".xlsx,.xls,.csv,.txt" disabled><div class="actions"><button id="extractFile" disabled>Ler arquivo</button><button id="loadExample" class="secondary" disabled>Usar exemplo</button></div><div id="extractStatus" class="statusbox">Salve uma avaliação antes de importar dados.</div></div>
+      <div id="pdfTab" class="tabPane panel"><h3>Importar PDF</h3><div id="pdfWarning" class="statusbox status-work">Atenção: PDF é caminho secundário. Planilhas Excel são muito mais confiáveis. Após ler PDF, confira a tabela antes de analisar.</div><p class="hint">PDFs de tabela podem falhar. O sistema tenta extrair texto, mas sempre exige conferência antes da análise.</p><input type="file" id="pdfOnlyInput" accept=".pdf" disabled><button id="readPdfOnly" disabled>Ler PDF</button></div>
+      <div id="manualTab" class="tabPane panel"><h3>Digitação manual</h3><p class="hint">Cole ou digite a tabela. Também serve para adicionar um aluno que faltou e respondeu depois.</p><textarea id="pasteData" disabled placeholder="Aluno\tQ1\tQ2\t...\nDescritores\tD1\tD2\t...\nGabarito\tA\tC\t...\nAna Silva\tA\tB\t..."></textarea><div class="actions"><button id="validateData" disabled>1. Validar estrutura</button></div><div id="validationResult"></div><div id="previewImport"></div></div>
       <div class="panel"><h3>Mapeamento das questões</h3><p class="hint">Após importar, confira se cada questão está ligada ao descritor correto da disciplina escolhida.</p><div id="questionMap" class="question-grid"></div></div>
     </section>
 
@@ -133,19 +135,19 @@
       </div>
       <div id="changelogBox" class="panel"></div></section>
 
-    <footer>ETE Professor José Luiz de Mendonça • Criado por Felipe Camargo • Versão 46.0</footer>
+    <footer>ETE Professor José Luiz de Mendonça • Criado por Felipe Camargo • Versão 47.0</footer>
   </main>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/app.js?v=46"></script>
-<script src="js/descritores.js?v=46"></script>
-<script src="js/importacao.js?v=46"></script>
-<script src="js/diagnostico.js?v=46"></script>
-<script src="js/tri.js?v=46"></script>
-<script src="js/relatorios.js?v=46"></script>
-<script src="js/exportacao.js?v=46"></script>
-<script src="js/banco-questoes.js?v=46"></script>
-<script src="js/supabase-sync.js?v=46"></script>
+<script src="js/app.js?v=47"></script>
+<script src="js/descritores.js?v=47"></script>
+<script src="js/importacao.js?v=47"></script>
+<script src="js/diagnostico.js?v=47"></script>
+<script src="js/tri.js?v=47"></script>
+<script src="js/relatorios.js?v=47"></script>
+<script src="js/exportacao.js?v=47"></script>
+<script src="js/banco-questoes.js?v=47"></script>
+<script src="js/supabase-sync.js?v=47"></script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 (function(){
  const A=()=>window.ETE;
- const proofStoreKey='ete_proof_map_v46';
+ const proofStoreKey='ete_proof_map_v47';
  function itemDiscrimination(results,itemIndex){
   if(results.students.length<4)return 0;
   const sorted=[...results.students].sort((a,b)=>b.total-a.total);
