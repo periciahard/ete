@@ -1,33 +1,25 @@
-# ETE Professor José Luiz de Mendonça — Diagnóstico Pedagógico V47
+# ETE Professor José Luiz de Mendonça — Diagnóstico Pedagógico V54
 
-Versão institucional do sistema de diagnóstico educacional.
+Versão de acabamento para piloto institucional.
 
-## Novidades da V47
+## Foco da V54
 
-- Criação obrigatória da avaliação antes do upload.
-- Cada avaliação é identificada por turma, disciplina, tipo e data.
-- Upload de Excel/PDF e digitação manual ficam bloqueados até a avaliação ser salva.
-- Histórico local de avaliações salvas.
-- Troca de turma/disciplina/tipo/data preserva a avaliação anterior e cria nova avaliação.
-- Duplicação de estrutura: copia questões, descritores e gabarito para outra turma, sem copiar respostas dos alunos.
+- Relatórios com layout profissional para impressão/PDF.
+- Painel de verificação do sistema antes do uso com professores.
+- Cache/versionamento atualizado para GitHub Pages.
+- Modo local mantido como fluxo principal.
+- Supabase permanece opcional para uso institucional.
+- Banco local de questões preservado para Mapa da Mina e fichas individualizadas.
 
-## Fluxo recomendado
+## Fluxo principal
 
-1. Preencher título, turma, disciplina, tipo, data e professor.
-2. Clicar em **Salvar avaliação**.
-3. Importar Excel ou digitar dados manualmente.
-4. Validar estrutura.
-5. Confirmar e analisar.
-6. Gerar relatórios, Mapa da Mina e fichas individualizadas.
+1. Criar e salvar a avaliação.
+2. Importar Excel.
+3. Validar estrutura.
+4. Confirmar e analisar.
+5. Ver diagnóstico, alunos e gestão.
+6. Exportar relatórios ou salvar na nuvem.
 
-## Modelo de Excel aceito
+## Observação técnica
 
-Modelo com coluna inicial:
-
-| Nome | Q1 | Q2 | ... |
-|---|---|---|---|
-| Descritores | D1 | D2 | ... |
-| Gabarito | A | C | ... |
-| Aluno | A | B | ... |
-
-Também aceita modelo sem a coluna inicial, desde que a primeira linha contenha as questões.
+A classificação Elementar I, Elementar II, Básico e Desejável é pedagógica e estimada a partir do desempenho da avaliação importada. Não substitui a escala oficial do SAEPE/SAEB.
